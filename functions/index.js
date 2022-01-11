@@ -9,30 +9,54 @@ const admin = require("firebase-admin");
 admin.initializeApp();
 
 const yahooFinance = require("yahoo-finance");
+const { error } = require("firebase-functions/logger");
 
 // Create and Deploy Your First Cloud Functions
 // https://firebase.google.com/docs/functions/write-firebase-functions
 
-// http://localhost:5001/track-portfolio/us-central1/helloWorld
-exports.helloWorld = functions.https.onRequest((request, response) => {
+// http://localhost:5001/track-portfolio/us-central1/stocks
+exports.stocks = functions.https.onCall((data, context) => {
+  // Message text passed from the client.
+  // Authentication / user information is automatically added to the request.
+  // const uid = context.auth.uid;
+  // const name = context.auth.token.name || null;
+  // const picture = context.auth.token.picture || null;
+  // const email = context.auth.token.email || null;
   //   functions.logger.info("Hello logs!", {structuredData: true});
-  var SYMBOLS = ["AAPL", "AMZN", "GOOGL","TSLA"];
+
+  if (!data || !data.tickers || !data.startDate || !data.endDate) {
+    // Throwing an HttpsError so that the client gets the error details.
+    throw new functions.https.HttpsError(
+      "invalid-argument",
+      "Include all args"
+    );
+  }
+
+  const date1 = new Date(data.startDate);
+  const date2 = new Date(data.endDate);
+  const diffDays = Math.ceil(Math.abs(date2 - date1) / (1000 * 60 * 60 * 24));
+  let period = "d";
+  if (diffDays > 368) period = "w";
+  if (diffDays > 365 * 5) period = "m";
+  const SYMBOLS = data.tickers;
   let reply = {};
-  yahooFinance
+  return yahooFinance
     .historical({
       symbols: SYMBOLS,
-      from: "2021-11-30",
-      to: "2021-12-30",
-      period: "d",
+      from: data.startDate,
+      to: data.endDate,
+      period,
     })
     .then(function (result) {
       Object.keys(result).forEach((ticker) => {
         let prices = [];
-        result[ticker].forEach(({ date, open, close }) => {
-          prices.push({ date, open, close });
-        });
-        reply[ticker] = prices;
+        result[ticker].forEach(
+          ({ date, open, close /*volume, high, low */ }) => {
+            prices.push({ date: date.toISOString().slice(0,10), open, close });
+          }
+        );
+        reply[ticker] = prices.reverse();
       });
-      response.send(reply);
+      return reply;
     });
 });

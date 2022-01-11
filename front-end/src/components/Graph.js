@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {
   AnimatedAxis, // any of these can be non-animated equivalents
-  Grid,
   AnimatedAreaSeries,
   XYChart,
   Tooltip,
@@ -12,73 +11,61 @@ import { LinearGradient } from "@visx/gradient";
 import { curveCardinal } from "@visx/curve";
 import CustomBG from "./CustomChartBackground";
 
-import AAPL from "../data/AAPL";
-import GOOG from "../data/GOOG";
-import TSLA from "../data/TSLA";
-import AMZN from "../data/AMZN"
-
-const basePortfolioAssets = [
-  { type: "stock", ticker: "AAPL", shares: 10 },
-  { type: "stock", ticker: "GOOG", shares: 1 },
-  { type: "stock", ticker: "TSLA", shares: 3 },
-  { type: "stock", ticker: "AMZN", shares: 1 },
-];
-
 const accessors = {
-  xAccessor: (d) => d.date,
+  xAccessor: (d) => new Date(d.date),
   yAccessor: (d) => d.close,
 };
 
-export default () => {
-  const [portfolioAssets, setPortfolioAssets] = useState(basePortfolioAssets);
+const fundColors = [
+  "#4F86C6",
+  "#65524D",
+  "#7F6A93",
+  "#23A455",
+  "#5b64c6",
+  "#F87575",
+  "#4fc67f",
+  "#378b59",
+];
+
+export default ({ historicalAssets, basePortfolioAssets }) => {
   const [showWhat, setShowWhat] = useState({});
-  const [combineAll, setCombineAll] = useState(false);
+  const [combineAll, setCombineAll] = useState(true);
   const [netWorth, setNetWorth] = useState([]);
 
   useEffect(() => {
     //set what to show
+    if (historicalAssets == null) return;
     let obj = {};
     let assetsToCombine = [];
     basePortfolioAssets.map((p) => {
       obj[p.ticker] = p;
       obj[p.ticker].show = true;
       const tickerData = findData(p);
-
       //now have historical with shares multiplied
       const newTickerData = tickerData.map((x) => ({
         close: x.close * p.shares,
-        date: new Date(x.date).toLocaleDateString(),
+        date: new Date(x.date).toISOString().slice(0, 10),
       }));
       assetsToCombine.push(...newTickerData);
     });
     const output = assetsToCombine.reduce((accumulator, cur) => {
       let date = cur.date;
-      let found = accumulator.find(elem => elem.date === date)
+      let found = accumulator.find((elem) => elem.date === date);
       if (found) found.close += cur.close;
       else accumulator.push(cur);
       return accumulator;
     }, []);
     setShowWhat(obj);
     //set net worth data
-    setNetWorth(output);
-  }, []);
-
-  const findNameFromTicker = (name) => {
-    const names = {
-      AAPL: "Apple, Inc.",
-      GOOG: "Alphabet",
-    };
-    return names[name];
-  };
+    setNetWorth(
+      output.sort(function (a, b) {
+        return new Date(a.date) - new Date(b.date);
+      })
+    );
+  }, [historicalAssets]);
 
   const findData = (postition) => {
-    const names = {
-      AAPL,
-      GOOG,
-      AMZN,
-      TSLA
-    };
-    return names[postition.ticker];
+    return historicalAssets[postition.ticker];
   };
 
   return (
@@ -117,13 +104,14 @@ export default () => {
                 <b>Compare</b>
                 <br />
                 {Object.keys(showWhat).map((fund, i) => {
-                  const data = findData({ticker:fund})
-                  console.log(data)
-                  const val = data[data.length - 1].close * showWhat[fund].shares
+                  const data = findData({ ticker: fund });
+                  const val =
+                    data[data.length - 1]?.close * showWhat[fund].shares;
                   return (
                     <span key={fund}>
                       <label className="check-container">
-                        {fund}: {showWhat[fund].shares} shares | ${val.toFixed(2)}
+                        {fund}: {showWhat[fund].shares} shares | $
+                        {val.toFixed(2)}
                         <input
                           name={fund}
                           type="checkbox"
@@ -140,7 +128,12 @@ export default () => {
                         />
                         <span
                           className="checkmark"
-                          style={{ backgroundColor: "red" }}
+                          style={{
+                            backgroundColor:
+                              i > fundColors.length - 1
+                                ? fundColors[fundColors.length - 1]
+                                : fundColors[i],
+                          }}
                         ></span>
                       </label>
                     </span>
@@ -151,7 +144,8 @@ export default () => {
                 <br />
                 <span>
                   <label className="check-container">
-                    Total Net Worth | ${netWorth[netWorth.length - 1]?.close?.toFixed(2)}
+                    Total Net Worth | $
+                    {netWorth[netWorth.length - 1]?.close?.toFixed(2)}
                     <input
                       name={"combine-all"}
                       type="checkbox"
@@ -162,7 +156,7 @@ export default () => {
                     />
                     <span
                       className="checkmark"
-                      style={{ backgroundColor: "red" }}
+                      style={{ backgroundColor: fundColors[0] }}
                     ></span>
                   </label>
                 </span>
@@ -178,8 +172,8 @@ export default () => {
                     </div>
                   );
                 })}
-              </div> */}
-              {/* <div className="item">
+              </div> 
+               <div className="item">
                 <br />
                 <table style={{ width: "100%" }}>
                   <thead>
@@ -224,8 +218,8 @@ export default () => {
                     })}
                   </tbody>
                 </table>
-              </div> */}
-              {/* <div className="item">
+              </div> 
+               <div className="item">
                 <b>Annualized Return </b>
                 <br />
                 {Object.keys(returns).map((fund) => {
@@ -262,22 +256,26 @@ export default () => {
                 parentTop={parent.top}
                 parentLeft={parent.left}
                 height={400}
-                xScale={{ type: "band" }}
+                xScale={{
+                  type: "time",
+                }}
                 yScale={{ type: "linear" }}
                 theme={buildChartTheme({
                   // backgroundColor: "#f09ae9",
-                  colors: ["red"],
+                  // colors: ["red"],
                   gridColor: "#336d88",
                   svgLabelBig: { fill: "#1d1b38" },
                   tickLength: 8,
                 })}
               >
                 <CustomBG />
-                <LinearGradient from="#4F86C6" to="#4FB0C6" id="gradient" />
+                {combineAll && (
+                  <LinearGradient from="#4F86C6" to="#4FB0C6" id="gradient" />
+                )}
                 <AnimatedAxis
                   orientation="bottom"
                   numTicks={5}
-                  tickFormat={(val) => new Date(val).toLocaleDateString()}
+                  tickFormat={(val) => new Date(val).toISOString().slice(0, 10)}
                 />
                 <AnimatedAxis
                   orientation="left"
@@ -290,14 +288,12 @@ export default () => {
                     curve={curveCardinal}
                     dataKey={"Net Worth"}
                     data={netWorth}
-                    // {...accessors}
-                    xAccessor={(d) => d.date}
-                    yAccessor={(d) => d.close}
+                    {...accessors}
                     fillOpacity={0.4}
-                    // lineProps={{ stroke: fundColors[fund] }}
+                    lineProps={{ stroke: fundColors[0] }}
                   />
                 ) : (
-                  portfolioAssets.map((fund) => {
+                  basePortfolioAssets.map((fund, i) => {
                     if (showWhat[fund.ticker] && showWhat[fund.ticker].show)
                       return (
                         <AnimatedAreaSeries
@@ -307,10 +303,15 @@ export default () => {
                           dataKey={fund.ticker}
                           data={findData(fund)}
                           // {...accessors}
-                          xAccessor={(d) => d.date}
+                          xAccessor={(d) => new Date(d.date)}
                           yAccessor={(d) => d.close * fund.shares}
                           fillOpacity={0.4}
-                          // lineProps={{ stroke: fundColors[fund] }}
+                          lineProps={{
+                            stroke:
+                              i > fundColors.length - 1
+                                ? fundColors[fundColors.length - 1]
+                                : fundColors[i],
+                          }}
                         />
                       );
                   })
@@ -325,24 +326,29 @@ export default () => {
                   renderTooltip={({ tooltipData, colorScale }) => {
                     const date = new Date(
                       accessors.xAccessor(tooltipData.nearestDatum.datum)
-                    ).toLocaleDateString();
+                    )
+                      .toISOString()
+                      .slice(0, 10);
                     return (
                       <div style={{ fontFamily: "Roboto" }}>
                         <span>{date}</span>
-                        {Object.keys(tooltipData?.datumByKey).map((fund) => {
-                          const thisPosition = basePortfolioAssets.find(
+                        {Object.keys(tooltipData?.datumByKey).map((fund, i) => {
+                          const p = basePortfolioAssets.findIndex(
                             (e) => e.ticker === fund
                           );
+                          
                           const value =
                             accessors.yAccessor(
                               tooltipData.datumByKey[fund].datum
-                            ) * (thisPosition? thisPosition.shares:1);
-
+                            ) * (basePortfolioAssets[p] ? basePortfolioAssets[p].shares : 1);
                           return (
                             <div key={fund}>
                               <span
                                 style={{
-                                  // color: fundColors[fund],
+                                  color:
+                                  p > fundColors.length - 1
+                                      ? fundColors[fundColors.length - 1]
+                                      : fundColors[p],
                                   textDecoration:
                                     tooltipData?.nearestDatum?.key === fund
                                       ? "underline"
@@ -354,7 +360,7 @@ export default () => {
                                 }}
                               >
                                 {fund} - $
-                                {Number(value.toFixed()).toLocaleString()}
+                                {Number(value.toFixed(2)).toLocaleString()}
                               </span>
                             </div>
                           );
