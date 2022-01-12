@@ -1,9 +1,11 @@
-@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@300&family=Roboto:wght@300&display=swap");
-
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@300&family=Roboto:wght@300;500&display=swap");
+body {
+  font-family: "Roboto";
+  --main-blue: #4f86c6;
+}
 .container {
   max-width: 1335px;
-  margin: 0 auto;
-  font-family: "Roboto";
+  background-color: #f1f5f9;
 }
 .row {
   display: flex;
@@ -36,7 +38,6 @@
   text-align: center;
 }
 
-
 .field {
   pointer-events: auto;
   font: inherit;
@@ -68,20 +69,18 @@
   position: relative;
 }
 .input-dollar.left input {
-  padding-left:18px;
+  padding-left: 18px;
 }
-
 
 .input-dollar:before {
   position: absolute;
   top: 0;
-  content:"$";
+  content: "$";
 }
 .input-dollar.left:before {
-  top:-3px;
+  top: -3px;
   left: 7px;
 }
-
 
 .check-container {
   display: block;
@@ -123,7 +122,6 @@
 
 /* When the checkbox is checked, add a blue background */
 
-
 /* Create the checkmark/indicator (hidden when not checked) */
 .checkmark:after {
   content: "";
@@ -138,8 +136,8 @@
 
 /* Style the checkmark/indicator */
 .check-container .checkmark:after {
-  left: 8px;
-  top: 3px;
+  left: 6px;
+  top: 2px;
   width: 5px;
   height: 10px;
   border: solid white;
@@ -147,4 +145,58 @@
   -webkit-transform: rotate(45deg);
   -ms-transform: rotate(45deg);
   transform: rotate(45deg);
+}
+
+input {
+  -webkit-text-size-adjust: 100%;
+  tab-size: 4;
+  -webkit-font-smoothing: antialiased;
+  box-sizing: border-box;
+  border: 0 solid;
+  --tw-border-opacity: 1;
+  font-family: inherit;
+  appearance: none;
+  border-width: 1px;
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 255 255);
+  font-size: 0.875rem;
+  border-radius: 0.25rem;
+  border-color: rgb(226 232 240);
+  padding: 0.5rem 0.75rem;
+  line-height: 1.25rem;
+  padding-left: 1rem;
+  font-weight: 500;
+  --tw-text-opacity: 1;
+  color: rgb(57, 67, 80);
+  cursor: pointer;
+}
+
+button {
+  -webkit-text-size-adjust: 100%;
+  tab-size: 4;
+  -webkit-font-smoothing: antialiased;
+  box-sizing: border-box;
+  border: 0 solid;
+  font-family: inherit;
+  margin: 5px;
+  text-transform: none;
+  -webkit-appearance: button;
+  background-image: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.25rem;
+  border-width: 1px;
+  border-color: transparent;
+  font-weight: 500;
+  line-height: 1.25rem;
+  padding: 0.5rem 0.625rem;
+  background-color: var(--main-blue);
+  color: rgb(255 255 255);
+}
+
+button:hover {
+  filter: brightness(95%);
+  /* opacity: 0.85; */
 }

@@ -8,7 +8,7 @@ ReactDOM.render(
   <React.StrictMode>
     <App />
   </React.StrictMode>,
-  document.getElementById('farmland_calc')
+  document.getElementById('react_app')
 );
 
 // If you want to start measuring performance in your app, pass a function
