@@ -5,11 +5,11 @@ import Flatpickr from "react-flatpickr";
 import Graph from "./Graph";
 
 const basePortfolioAssets = [
-  { type: "stock", ticker: "AMD", shares: 1 },
+  { type: "stock", ticker: "AMD", shares: 100 },
   { type: "stock", ticker: "VBK", shares: 287 },
   { type: "stock", ticker: "VCLT", shares: 245.1899 },
   { type: "stock", ticker: "AMZN", shares: 1 },
-  { type: "stock", ticker: "VOO", shares: 1072 },
+  { type: "stock", ticker: "VOO", shares: 107 },
   { type: "stock", ticker: "VNQ", shares: 210 },
   { type: "stock", ticker: "AAPL", shares: 90.23 },
   { type: "stock", ticker: "NVDA", shares: 80 },

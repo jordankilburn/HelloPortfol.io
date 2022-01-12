@@ -11,6 +11,8 @@ import { LinearGradient } from "@visx/gradient";
 import { curveCardinal } from "@visx/curve";
 import CustomBG from "./CustomChartBackground";
 import numbFormat from "../utils/numbFormat";
+import Pie from "./Pie";
+import toLocaleFixed from "../utils/toLocaleFixed";
 
 const accessors = {
   xAccessor: (d) => new Date(d.date),
@@ -41,12 +43,14 @@ export default ({ historicalAssets, basePortfolioAssets, flatpickr }) => {
     basePortfolioAssets.map((p) => {
       obj[p.ticker] = p;
       obj[p.ticker].show = true;
+     
       const tickerData = findData(p);
       //now have historical with shares multiplied
       const newTickerData = tickerData.map((x) => ({
         close: x.close * p.shares,
         date: new Date(x.date).toISOString().slice(0, 10),
       }));
+      obj[p.ticker].value = newTickerData[newTickerData.length-1].close;
       assetsToCombine.push(...newTickerData);
     });
     const output = assetsToCombine.reduce((accumulator, cur) => {
@@ -70,83 +74,86 @@ export default ({ historicalAssets, basePortfolioAssets, flatpickr }) => {
   };
 
   return (
-    <div className="row">
-      <div className="item inputs">
-        <div className="container">
-          <div className="row">
-            <div className="item">
-            <b>Choose Date Range</b>
-            <br />
-              {flatpickr} 
-              <b>Total Net Worth | $
-                  {netWorth[netWorth.length - 1]?.close?.toLocaleString()}</b>
-              <br />
-              <span>
-                <label className="check-container">
-                  Show Breakdown
-                  <input
-                    name={"combine-all"}
-                    type="checkbox"
-                    checked={!combineAll}
-                    onChange={() => {
-                      setCombineAll(!combineAll);
-                    }}
-                  />
-                  <span
-                    className="checkmark"
-                    style={{ backgroundColor: fundColors[0] }}
-                  ></span>
-                </label>
-              </span>
-              <br />
-              {!combineAll && (<b>Breakdown</b>)}
-              {!combineAll && 
-              Object.keys(showWhat).map((fund, i) => {
-                const data = findData({ ticker: fund });
-                const val =
-                  data[data.length - 1]?.close * showWhat[fund].shares;
-                return (
-                  <span key={fund}>
-                    <label className="check-container">
-                      {fund}: {showWhat[fund].shares} shares | ${val.toLocaleString()}
-                      <input
-                        name={fund}
-                        type="checkbox"
-                        checked={showWhat[fund].show}
-                        onChange={() => {
-                          setShowWhat({
-                            ...showWhat,
-                            [fund]: {
-                              ...showWhat[fund],
-                              show: !showWhat[fund].show,
-                            },
-                          });
-                        }}
-                      />
-                      <span
-                        className="checkmark"
-                        style={{
-                          backgroundColor:
-                            i > fundColors.length - 1
-                              ? fundColors[fundColors.length - 1]
-                              : fundColors[i],
-                        }}
-                      ></span>
-                    </label>
-                  </span>
-                );
-              })}
-              <br />
-              
-            </div>
-            {/* <div className="item">
+    <>
+      <div className="row">
+        <div className="item inputs">
+          <div className="container">
+            <div className="row">
+              <div className="item">
+                <b>Choose Date Range</b>
+                <br />
+                {flatpickr}
+                <b>
+                  Total Net Worth | $
+                  {toLocaleFixed(netWorth[netWorth.length - 1]?.close)}
+                </b>
+                <br />
+                <span>
+                  <label className="check-container">
+                    Show Breakdown
+                    <input
+                      name={"combine-all"}
+                      type="checkbox"
+                      checked={!combineAll}
+                      onChange={() => {
+                        setCombineAll(!combineAll);
+                      }}
+                    />
+                    <span
+                      className="checkmark"
+                      style={{ backgroundColor: fundColors[0] }}
+                    ></span>
+                  </label>
+                </span>
+                <br />
+                {!combineAll && <b>Breakdown</b>}
+                {!combineAll &&
+                  Object.keys(showWhat).map((fund, i) => {
+                    const data = findData({ ticker: fund });
+                    const val =
+                      data[data.length - 1]?.close * showWhat[fund].shares;
+                    return (
+                      <span key={fund}>
+                        <label className="check-container">
+                          {fund}: {showWhat[fund].shares} shares | $
+                          {toLocaleFixed(val)}
+                          <input
+                            name={fund}
+                            type="checkbox"
+                            checked={showWhat[fund].show}
+                            onChange={() => {
+                              setShowWhat({
+                                ...showWhat,
+                                [fund]: {
+                                  ...showWhat[fund],
+                                  show: !showWhat[fund].show,
+                                },
+                              });
+                            }}
+                          />
+                          <span
+                            className="checkmark"
+                            style={{
+                              backgroundColor:
+                                i > fundColors.length - 1
+                                  ? fundColors[fundColors.length - 1]
+                                  : fundColors[i],
+                            }}
+                          ></span>
+                        </label>
+                      </span>
+                    );
+                  })}
+                <br />
+              </div>
+              {/* <div className="item">
                 <b>Final Value</b>
                 <br />
                 {Object.keys(returns).map((fund) => {
                   return (
                     <div key={fund}>
                       {findNameFromTicker(fund)}:{" "}
-                      <b>${Number(returns[fund].toFixed()).toLocaleString()}</b>
+                      <b>${Number(returns[fund].toFixed()).toLocaleFixed(2)}</b>
                     </div>
                   );
                 })}
@@ -186,10 +193,10 @@ export default ({ historicalAssets, basePortfolioAssets, flatpickr }) => {
                             <b>{findNameFromTicker(fund)}</b>
                           </td>
                           <td className="center">
-                            {Number(totReturn.toFixed()).toLocaleString()}%
+                            {Number(totReturn.toFixed()).toLocaleFixed(2)}%
                           </td>
                           <td className="center">
-                            {Number(annReturn.toFixed(2)).toLocaleString()}%
+                            {Number(annReturn.toFixed(2)).toLocaleFixed(2)}%
                           </td>
                         </tr>
                       );
@@ -212,145 +219,159 @@ export default ({ historicalAssets, basePortfolioAssets, flatpickr }) => {
                   return (
                     <div key={fund}>
                       {findNameFromTicker(fund)}:{" "}
-                      <b>{Number(annReturn.toFixed(2)).toLocaleString()}%</b>
+                      <b>{Number(annReturn.toFixed(2)).toLocaleFixed(2)}%</b>
                     </div>
                   );
                 })}
               </div> */}
-            <br />
+              <br />
+            </div>
           </div>
         </div>
-      </div>
 
-      <ParentSize className="item" style={{ paddingLeft: 0, paddingRight: 0 }}>
-        {(parent) => {
-          return (
-            <XYChart
-              parentWidth={parent.width}
-              parentHeight={parent.height}
-              parentTop={parent.top}
-              parentLeft={parent.left}
-              height={400}
-              xScale={{
-                type: "time",
-              }}
-              yScale={{ type: "linear" }}
-              theme={buildChartTheme({
-                backgroundColor: "#F1F5F9",
-                gridColor: "#336d88",
-                svgLabelBig: { fill: "#1d1b38" },
-                tickLength: 8,
-              })}
-            >
-              <CustomBG />
-              {combineAll && (
-                <LinearGradient from="#4F86C6" to="#4FB0C6" id="gradient" />
-              )}
-              <AnimatedAxis
-                orientation="bottom"
-                numTicks={5}
-                tickFormat={(val) => new Date(val).toISOString().slice(0, 10)}
-              />
-              <AnimatedAxis
-              labelOffset={2}
-                orientation="left"
-                tickFormat={(val) => `$${numbFormat(val)}`}
-              />
-
-              {combineAll ? (
-                <AnimatedAreaSeries
-                  fill="url('#gradient')"
-                  curve={curveCardinal}
-                  dataKey={"Net Worth"}
-                  data={netWorth}
-                  {...accessors}
-                  fillOpacity={0.4}
-                  lineProps={{ stroke: fundColors[0] }}
-                />
-              ) : (
-                basePortfolioAssets.map((fund, i) => {
-                  if (showWhat[fund.ticker] && showWhat[fund.ticker].show)
-                    return (
-                      <AnimatedAreaSeries
-                        key={fund.ticker}
-                        fill="url('#gradient')"
-                        curve={curveCardinal}
-                        dataKey={fund.ticker}
-                        data={findData(fund)}
-                        // {...accessors}
-                        xAccessor={(d) => new Date(d.date)}
-                        yAccessor={(d) => d.close * fund.shares}
-                        fillOpacity={0.4}
-                        lineProps={{
-                          stroke:
-                            i > fundColors.length - 1
-                              ? fundColors[fundColors.length - 1]
-                              : fundColors[i],
-                        }}
-                      />
-                    );
-                })
-              )}
-
-              <Tooltip
-                // snapTooltipToDatumX
-                // snapTooltipToDatumY
-                showVerticalCrosshair
-                showHorizontalCrosshair
-                showSeriesGlyphs
-                renderTooltip={({ tooltipData, colorScale }) => {
-                  const date = new Date(
-                    accessors.xAccessor(tooltipData.nearestDatum.datum)
-                  )
-                    .toISOString()
-                    .slice(0, 10);
-                  return (
-                    <div style={{ fontFamily: "Roboto" }}>
-                      <span>{date}</span>
-                      {Object.keys(tooltipData?.datumByKey).map((fund, i) => {
-                        const p = basePortfolioAssets.findIndex(
-                          (e) => e.ticker === fund
-                        );
-
-                        const value =
-                          accessors.yAccessor(
-                            tooltipData.datumByKey[fund].datum
-                          ) *
-                          (basePortfolioAssets[p]
-                            ? basePortfolioAssets[p].shares
-                            : 1);
-                        return (
-                          <div key={fund}>
-                            <span
-                              style={{
-                                color:
-                                  p > fundColors.length - 1
-                                    ? fundColors[fundColors.length - 1]
-                                    : fundColors[p],
-                                textDecoration:
-                                  tooltipData?.nearestDatum?.key === fund
-                                    ? "underline"
-                                    : undefined,
-                                fontWeight:
-                                  tooltipData?.nearestDatum?.key === fund
-                                    ? 700
-                                    : undefined,
-                              }}
-                            >
-                              {fund} - $
-                              {Number(value.toFixed(2)).toLocaleString()}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  );
+        <ParentSize
+          className="item"
+          style={{ paddingLeft: 0, paddingRight: 0 }}
+        >
+          {(parent) => {
+            return (
+              <XYChart
+                parentWidth={parent.width}
+                parentHeight={parent.height}
+                parentTop={parent.top}
+                parentLeft={parent.left}
+                height={400}
+                xScale={{
+                  type: "time",
                 }}
-              />
-            </XYChart>
-          );
-        }}
-      </ParentSize>
-    </div>
+                yScale={{ type: "linear" }}
+                theme={buildChartTheme({
+                  backgroundColor: "#F1F5F9",
+                  gridColor: "#336d88",
+                  svgLabelBig: { fill: "#1d1b38" },
+                  tickLength: 8,
+                })}
+              >
+                <CustomBG />
+                {combineAll && (
+                  <LinearGradient from="#4F86C6" to="#4FB0C6" id="gradient" />
+                )}
+                <AnimatedAxis
+                  orientation="bottom"
+                  numTicks={5}
+                  tickFormat={(val) => new Date(val).toISOString().slice(0, 10)}
+                />
+                <AnimatedAxis
+                  labelOffset={2}
+                  orientation="left"
+                  tickFormat={(val) => `$${numbFormat(val)}`}
+                />
+
+                {combineAll ? (
+                  <AnimatedAreaSeries
+                    fill="url('#gradient')"
+                    curve={curveCardinal}
+                    dataKey={"Net Worth"}
+                    data={netWorth}
+                    {...accessors}
+                    fillOpacity={0.4}
+                    lineProps={{ stroke: fundColors[0] }}
+                  />
+                ) : (
+                  basePortfolioAssets.map((fund, i) => {
+                    if (showWhat[fund.ticker] && showWhat[fund.ticker].show)
+                      return (
+                        <AnimatedAreaSeries
+                          key={fund.ticker}
+                          fill="url('#gradient')"
+                          curve={curveCardinal}
+                          dataKey={fund.ticker}
+                          data={findData(fund)}
+                          // {...accessors}
+                          xAccessor={(d) => new Date(d.date)}
+                          yAccessor={(d) => d.close * fund.shares}
+                          fillOpacity={0.4}
+                          lineProps={{
+                            stroke:
+                              i > fundColors.length - 1
+                                ? fundColors[fundColors.length - 1]
+                                : fundColors[i],
+                          }}
+                        />
+                      );
+                  })
+                )}
+
+                <Tooltip
+                  // snapTooltipToDatumX
+                  // snapTooltipToDatumY
+                  showVerticalCrosshair
+                  showHorizontalCrosshair
+                  showSeriesGlyphs
+                  renderTooltip={({ tooltipData, colorScale }) => {
+                    const date = new Date(
+                      accessors.xAccessor(tooltipData.nearestDatum.datum)
+                    )
+                      .toISOString()
+                      .slice(0, 10);
+                    return (
+                      <div style={{ fontFamily: "Roboto" }}>
+                        <span>{date}</span>
+                        {Object.keys(tooltipData?.datumByKey).map((fund, i) => {
+                          const p = basePortfolioAssets.findIndex(
+                            (e) => e.ticker === fund
+                          );
+
+                          const value =
+                            accessors.yAccessor(
+                              tooltipData.datumByKey[fund].datum
+                            ) *
+                            (basePortfolioAssets[p]
+                              ? basePortfolioAssets[p].shares
+                              : 1);
+                          return (
+                            <div key={fund}>
+                              <span
+                                style={{
+                                  color:
+                                    p > fundColors.length - 1
+                                      ? fundColors[fundColors.length - 1]
+                                      : fundColors[p],
+                                  textDecoration:
+                                    tooltipData?.nearestDatum?.key === fund
+                                      ? "underline"
+                                      : undefined,
+                                  fontWeight:
+                                    tooltipData?.nearestDatum?.key === fund
+                                      ? 700
+                                      : undefined,
+                                }}
+                              >
+                                {fund} - $
+                                {toLocaleFixed(value)}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  }}
+                />
+              </XYChart>
+            );
+          }}
+        </ParentSize>
+      </div>
+      <div className="row">
+        <ParentSize
+          className="item"
+          style={{ paddingLeft: 0, paddingRight: 0 }}
+        >
+          {(parent) => (
+            <Pie parent={parent} showWhat={showWhat} fundColors={fundColors} netWorth={netWorth[netWorth.length - 1]?.close}/>
+          )}
+        </ParentSize>
+      </div>
+    </>
   );
 };
