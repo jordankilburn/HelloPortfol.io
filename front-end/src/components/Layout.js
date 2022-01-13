@@ -6,8 +6,8 @@ import "react-toastify/dist/ReactToastify.css";
 import Topbar from "./Topbar";
 import Aside from "./Aside";
 
-import Dash from "./components/Dash";
-import Manage from "./components/Manage";
+import Dash from "../pages/Dash";
+import Manage from "../pages/Manage";
 
 import Footer from "./Footer";
 

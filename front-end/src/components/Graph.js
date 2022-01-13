@@ -13,6 +13,8 @@ import CustomBG from "./CustomChartBackground";
 import numbFormat from "../utils/numbFormat";
 import Pie from "./Pie";
 import toLocaleFixed from "../utils/toLocaleFixed";
+import { useRecoilState } from "recoil";
+import { showWhatState } from "../recoil_states";
 
 const accessors = {
   xAccessor: (d) => new Date(d.date),
@@ -30,8 +32,12 @@ const fundColors = [
   "#378b59",
 ];
 
+
+
 export default ({ historicalAssets, basePortfolioAssets, flatpickr }) => {
-  const [showWhat, setShowWhat] = useState({});
+  
+
+  const [showWhat, setShowWhat] = useRecoilState(showWhatState);
   const [combineAll, setCombineAll] = useState(true);
   const [netWorth, setNetWorth] = useState([]);
 
@@ -41,7 +47,7 @@ export default ({ historicalAssets, basePortfolioAssets, flatpickr }) => {
     let obj = {};
     let assetsToCombine = [];
     basePortfolioAssets.map((p) => {
-      obj[p.ticker] = p;
+      obj[p.ticker] = Object.assign({}, p);
       obj[p.ticker].show = true;
       if (historicalAssets != null) {
         const tickerData = findData(p);

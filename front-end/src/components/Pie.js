@@ -56,7 +56,7 @@ export default function Example({
                   : fundColors[i];
               return (
                 <g
-                  key={ticker}
+                  key={i}
                   onMouseEnter={() => setActive(arc.data)}
                   onMouseLeave={() => setActive(null)}
                 >

@@ -8,10 +8,7 @@ export default () => {
         <div className="item">
           {" "}
           <h2>Manage Page</h2>
-          <p>You can do this, I believe in you.</p>
-          <nav>
-            <Link to="/">Dashboard</Link>
-          </nav>
+          <p>Add/Remove assets from portfolio</p>
         </div>
       </div>
     </>

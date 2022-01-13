@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import Layout from "./Layout";
+import { RecoilRoot } from "recoil";
+
 import "./styles/App.scss";
 
 import { initializeApp } from "firebase/app";
 import { getFunctions, connectFunctionsEmulator } from "firebase/functions";
 
-
+import Layout from "./components/Layout";
 
 // Initialize Firebase
 const app = initializeApp({
@@ -18,7 +19,11 @@ const functions = getFunctions(app);
 connectFunctionsEmulator(functions, "localhost", 5001);
 
 function App() {
-  return <Layout functions={functions} />;
+  return (
+    <RecoilRoot>
+      <Layout functions={functions} />
+    </RecoilRoot>
+  );
 }
 
 export default App;

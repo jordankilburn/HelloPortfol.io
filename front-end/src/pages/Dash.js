@@ -2,34 +2,32 @@ import React, { useState, useEffect } from "react";
 import { httpsCallable } from "firebase/functions";
 import "flatpickr/dist/themes/airbnb.css";
 import Flatpickr from "react-flatpickr";
-import Graph from "./Graph";
-
+import Graph from "../components/Graph";
+import { useRecoilState } from "recoil";
 import { toast } from "react-toastify";
-
-const basePortfolioAssets = [
-  { type: "stock", ticker: "AMD", shares: 100 },
-  { type: "stock", ticker: "VBK", shares: 287 },
-  { type: "stock", ticker: "VCLT", shares: 245.1899 },
-  { type: "stock", ticker: "AMZN", shares: 1 },
-  { type: "stock", ticker: "VOO", shares: 107 },
-  { type: "stock", ticker: "VNQ", shares: 210 },
-  { type: "stock", ticker: "AAPL", shares: 90.23 },
-  { type: "stock", ticker: "NVDA", shares: 80 },
-  { type: "stock", ticker: "MSFT", shares: 53.21 },
-];
+import {
+  basePortfolioAssetsState,
+  historicalAssetsState,
+  dateRangeState,
+} from "../recoil_states";
 
 export default ({ functions }) => {
   const stocks = httpsCallable(functions, "stocks");
-  const [historicalAssets, setHistoricalAssets] = useState(null);
-  const [dateRange, setDateRange] = useState([
-    new Date(Date.now() - 30 * 86400000), //past 30 days
-    ""//Date.now(),
-  ]);
+  const [basePortfolioAssets, setBasePortfolioAssets] = useRecoilState(
+    basePortfolioAssetsState
+  );
+  const [historicalAssets, setHistoricalAssets] = useRecoilState(
+    historicalAssetsState
+  );
+  const [dateRange, setDateRange] = useRecoilState(dateRangeState);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    if (dateRange[0] == "" || dateRange[1] == "") return;
+  const setDates = (range) => {
+    if (range[0] == dateRange[0] && range[1] == dateRange[1]) return
+    setDateRange(range)
+    if (range[0] == "" || range[1] == "") return;
     setLoading(true);
     const id = toast.loading("Loading Portfolio...", {});
     let tickers = [];
@@ -37,8 +35,8 @@ export default ({ functions }) => {
     basePortfolioAssets.forEach((asset) => tickers.push(asset.ticker));
     stocks({
       tickers,
-      startDate: dateRange[0],
-      endDate: new Date(dateRange[1] + 1 * 86400000),
+      startDate: range[0],
+      endDate: new Date(range[1] + 1 * 86400000),
     })
       .then((result) => {
         // Read result of the Cloud Function.
@@ -63,7 +61,7 @@ export default ({ functions }) => {
         });
         setError("Unable to load :(");
       });
-  }, [dateRange]);
+  }
 
   const flatpickr = (
     <div style={{ margin: "0.5rem 0" }}>
@@ -74,26 +72,26 @@ export default ({ functions }) => {
         }}
         value={dateRange}
         onChange={(date) => {
-          setDateRange(date);
+          setDates(date);
         }}
       /> */}
       <button
         onClick={() => {
-          setDateRange([new Date(Date.now() - 30 * 86400000), Date.now()]);
+          setDates([new Date(Date.now() - 30 * 86400000), Date.now()]);
         }}
       >
         Past 30 Days
       </button>
       <button
         onClick={() => {
-          setDateRange([new Date(Date.now() - 90 * 86400000), Date.now()]);
+          setDates([new Date(Date.now() - 90 * 86400000), Date.now()]);
         }}
       >
         Past 90 Days
       </button>
       <button
         onClick={() => {
-          setDateRange([new Date(Date.now() - 365 * 86400000), Date.now()]);
+          setDates([new Date(Date.now() - 365 * 86400000), Date.now()]);
         }}
       >
         Past 12 Months
@@ -111,11 +109,10 @@ export default ({ functions }) => {
     </div>
   );
   return (
-    
-      <Graph
-        historicalAssets={historicalAssets}
-        basePortfolioAssets={basePortfolioAssets}
-        flatpickr={flatpickr}
-      />
+    <Graph
+      historicalAssets={historicalAssets}
+      basePortfolioAssets={basePortfolioAssets}
+      flatpickr={flatpickr}
+    />
   );
 };
