@@ -4,6 +4,8 @@ import "flatpickr/dist/themes/airbnb.css";
 import Flatpickr from "react-flatpickr";
 import Graph from "./Graph";
 
+import { toast } from "react-toastify";
+
 const basePortfolioAssets = [
   { type: "stock", ticker: "AMD", shares: 100 },
   { type: "stock", ticker: "VBK", shares: 287 },
@@ -21,12 +23,15 @@ export default ({ functions }) => {
   const [historicalAssets, setHistoricalAssets] = useState(null);
   const [dateRange, setDateRange] = useState([
     new Date(Date.now() - 30 * 86400000), //past 30 days
-    Date.now(),
+    ""//Date.now(),
   ]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (dateRange[0] == "" || dateRange[1] == "") return;
-
+    setLoading(true);
+    const id = toast.loading("Loading Portfolio...", {});
     let tickers = [];
 
     basePortfolioAssets.forEach((asset) => tickers.push(asset.ticker));
@@ -34,11 +39,30 @@ export default ({ functions }) => {
       tickers,
       startDate: dateRange[0],
       endDate: new Date(dateRange[1] + 1 * 86400000),
-    }).then((result) => {
-      // Read result of the Cloud Function.
-      const data = result.data;
-      setHistoricalAssets(data);
-    });
+    })
+      .then((result) => {
+        // Read result of the Cloud Function.
+        const data = result.data;
+        setHistoricalAssets(data);
+        setLoading(false);
+        toast.update(id, {
+          render: "Enjoy!",
+          type: "success",
+          isLoading: false,
+          autoClose: 3000,
+          closeButton: null,
+        });
+      })
+      .catch((e) => {
+        toast.update(id, {
+          render: "Unable to load :(",
+          type: "error",
+          isLoading: false,
+          autoClose: null,
+          closeButton: null,
+        });
+        setError("Unable to load :(");
+      });
   }, [dateRange]);
 
   const flatpickr = (
@@ -76,7 +100,10 @@ export default ({ functions }) => {
       </button>
       <button
         onClick={() => {
-          setDateRange([new Date(Date.now() - 365 * 10 * 86400000), Date.now()]);
+          setDateRange([
+            new Date(Date.now() - 365 * 10 * 86400000),
+            Date.now(),
+          ]);
         }}
       >
         Past 10 Years
@@ -84,12 +111,11 @@ export default ({ functions }) => {
     </div>
   );
   return (
-    <div className="container">
+    
       <Graph
         historicalAssets={historicalAssets}
         basePortfolioAssets={basePortfolioAssets}
         flatpickr={flatpickr}
       />
-    </div>
   );
 };

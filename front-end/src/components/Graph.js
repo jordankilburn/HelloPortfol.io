@@ -37,22 +37,25 @@ export default ({ historicalAssets, basePortfolioAssets, flatpickr }) => {
 
   useEffect(() => {
     //set what to show
-    if (historicalAssets == null) return;
+
     let obj = {};
     let assetsToCombine = [];
     basePortfolioAssets.map((p) => {
       obj[p.ticker] = p;
       obj[p.ticker].show = true;
-     
-      const tickerData = findData(p);
-      //now have historical with shares multiplied
-      const newTickerData = tickerData.map((x) => ({
-        close: x.close * p.shares,
-        date: new Date(x.date).toISOString().slice(0, 10),
-      }));
-      obj[p.ticker].value = newTickerData[newTickerData.length-1].close;
-      assetsToCombine.push(...newTickerData);
+      if (historicalAssets != null) {
+        const tickerData = findData(p);
+        //now have historical with shares multiplied
+        const newTickerData = tickerData.map((x) => ({
+          close: x.close * p.shares,
+          date: new Date(x.date).toISOString().slice(0, 10),
+        }));
+        obj[p.ticker].value = newTickerData[newTickerData.length - 1].close;
+        assetsToCombine.push(...newTickerData);
+      }
     });
+    setShowWhat(obj);
+    if (historicalAssets == null) return;
     const output = assetsToCombine.reduce((accumulator, cur) => {
       let date = cur.date;
       let found = accumulator.find((elem) => elem.date === date);
@@ -60,7 +63,7 @@ export default ({ historicalAssets, basePortfolioAssets, flatpickr }) => {
       else accumulator.push(cur);
       return accumulator;
     }, []);
-    setShowWhat(obj);
+
     //set net worth data
     setNetWorth(
       output.sort(function (a, b) {
@@ -70,80 +73,100 @@ export default ({ historicalAssets, basePortfolioAssets, flatpickr }) => {
   }, [historicalAssets]);
 
   const findData = (postition) => {
+    if (historicalAssets == null) return null;
     return historicalAssets[postition.ticker];
   };
 
   return (
-    <>
+    <div className="dash">
       <div className="row">
         <div className="item inputs">
           <div className="container">
             <div className="row">
               <div className="item">
-                <b>Choose Date Range</b>
-                <br />
+                <h3>Choose Date Range</h3>
                 {flatpickr}
-                <b>
-                  Total Net Worth | $
-                  {toLocaleFixed(netWorth[netWorth.length - 1]?.close)}
-                </b>
-                <br />
-                <span>
-                  <label className="check-container">
-                    Show Breakdown
-                    <input
-                      name={"combine-all"}
-                      type="checkbox"
-                      checked={!combineAll}
-                      onChange={() => {
-                        setCombineAll(!combineAll);
-                      }}
-                    />
-                    <span
-                      className="checkmark"
-                      style={{ backgroundColor: fundColors[0] }}
-                    ></span>
-                  </label>
-                </span>
-                <br />
-                {!combineAll && <b>Breakdown</b>}
-                {!combineAll &&
-                  Object.keys(showWhat).map((fund, i) => {
-                    const data = findData({ ticker: fund });
-                    const val =
-                      data[data.length - 1]?.close * showWhat[fund].shares;
-                    return (
-                      <span key={fund}>
-                        <label className="check-container">
-                          {fund}: {showWhat[fund].shares} shares | $
-                          {toLocaleFixed(val)}
-                          <input
-                            name={fund}
-                            type="checkbox"
-                            checked={showWhat[fund].show}
-                            onChange={() => {
-                              setShowWhat({
-                                ...showWhat,
-                                [fund]: {
-                                  ...showWhat[fund],
-                                  show: !showWhat[fund].show,
-                                },
-                              });
-                            }}
-                          />
-                          <span
-                            className="checkmark"
-                            style={{
-                              backgroundColor:
-                                i > fundColors.length - 1
-                                  ? fundColors[fundColors.length - 1]
-                                  : fundColors[i],
-                            }}
-                          ></span>
-                        </label>
-                      </span>
-                    );
-                  })}
+                {netWorth.length > 0 && (
+                  <>
+                    <h3>
+                      Total Net Worth | $
+                      {toLocaleFixed(netWorth[netWorth.length - 1]?.close)}
+                    </h3>
+                    <span>
+                      <label className="check-container">
+                        Show Breakdown
+                        <input
+                          name={"combine-all"}
+                          type="checkbox"
+                          checked={!combineAll}
+                          onChange={() => {
+                            setCombineAll(!combineAll);
+                          }}
+                        />
+                        <span
+                          className="checkmark"
+                          style={{ backgroundColor: fundColors[0] }}
+                        ></span>
+                      </label>
+                    </span>
+                  </>
+                )}
+                <h3>Portfolio</h3>
+                <table style={{ width: "100%" }}>
+                  <thead>
+                    <tr>
+                      <th>Ticker</th>
+                      <th>Shares</th>
+                      {Object.values(showWhat)[0]?.value && (
+                        <th>Current Value</th>
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.keys(showWhat).map((fund, i) => {
+                      const data = findData({ ticker: fund });
+                      const val =
+                        data == null
+                          ? null
+                          : data[data.length - 1]?.close *
+                            showWhat[fund].shares;
+                      return (
+                        <tr key={i}>
+                          <td>
+                            <label className="check-container">
+                              {fund}
+                              <input
+                                name={fund}
+                                type="checkbox"
+                                checked={showWhat[fund].show}
+                                onChange={() => {
+                                  setShowWhat({
+                                    ...showWhat,
+                                    [fund]: {
+                                      ...showWhat[fund],
+                                      show: !showWhat[fund].show,
+                                    },
+                                  });
+                                }}
+                              />
+                              <span
+                                className="checkmark"
+                                style={{
+                                  backgroundColor:
+                                    i > fundColors.length - 1
+                                      ? fundColors[fundColors.length - 1]
+                                      : fundColors[i],
+                                }}
+                              ></span>
+                            </label>
+                          </td>
+                          <td>{toLocaleFixed(showWhat[fund].shares, 0)}</td>
+                          {data && <td> ${toLocaleFixed(val)}</td>}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
                 <br />
               </div>
               {/* <div className="item">
@@ -347,8 +370,7 @@ export default ({ historicalAssets, basePortfolioAssets, flatpickr }) => {
                                       : undefined,
                                 }}
                               >
-                                {fund} - $
-                                {toLocaleFixed(value)}
+                                {fund} - ${toLocaleFixed(value)}
                               </span>
                             </div>
                           );
@@ -368,10 +390,15 @@ export default ({ historicalAssets, basePortfolioAssets, flatpickr }) => {
           style={{ paddingLeft: 0, paddingRight: 0 }}
         >
           {(parent) => (
-            <Pie parent={parent} showWhat={showWhat} fundColors={fundColors} netWorth={netWorth[netWorth.length - 1]?.close}/>
+            <Pie
+              parent={parent}
+              showWhat={showWhat}
+              fundColors={fundColors}
+              netWorth={netWorth[netWorth.length - 1]?.close}
+            />
           )}
         </ParentSize>
       </div>
-    </>
+    </div>
   );
 };

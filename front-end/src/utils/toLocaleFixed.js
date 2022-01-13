@@ -1,7 +1,7 @@
-export default (n) => {
-  if (n)
-    return n.toLocaleString(undefined, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
+export default (input,n=2) => {
+  if (input)
+    return input.toLocaleString(undefined, {
+      minimumFractionDigits: n,
+      maximumFractionDigits: n,
     });
 };

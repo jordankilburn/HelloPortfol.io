@@ -1,7 +1,11 @@
-import "./App.css";
-import Dash from "./components/Dash";
+import React, { useState } from "react";
+import Layout from "./Layout";
+import "./styles/App.scss";
+
 import { initializeApp } from "firebase/app";
-import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
+import { getFunctions, connectFunctionsEmulator } from "firebase/functions";
+
+
 
 // Initialize Firebase
 const app = initializeApp({
@@ -14,7 +18,7 @@ const functions = getFunctions(app);
 connectFunctionsEmulator(functions, "localhost", 5001);
 
 function App() {
-  return <Dash functions={functions} />;
+  return <Layout functions={functions} />;
 }
 
 export default App;
