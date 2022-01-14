@@ -7,7 +7,7 @@ export const showWhatState = atom({
 
 export const historicalAssetsState = atom({
   key: "historicalAssetsState", // unique ID (with respect to other atoms/selectors)
-  default: null, // default value (aka initial value)
+  default: {}, // default value (aka initial value)
 });
 
 export const dateRangeState = atom({
@@ -21,14 +21,20 @@ export const dateRangeState = atom({
 export const basePortfolioAssetsState = atom({
   key: "basePortfolioAssetsState", // unique ID (with respect to other atoms/selectors)
   default: [
-    { type: "stock", ticker: "AMD", shares: 100 },
-    { type: "stock", ticker: "VBK", shares: 287 },
-    { type: "stock", ticker: "VCLT", shares: 245.1899 },
-    { type: "stock", ticker: "AMZN", shares: 1 },
-    { type: "stock", ticker: "VOO", shares: 107 },
-    { type: "stock", ticker: "VNQ", shares: 210 },
-    { type: "stock", ticker: "AAPL", shares: 90.23 },
-    { type: "stock", ticker: "NVDA", shares: 80 },
-    { type: "stock", ticker: "MSFT", shares: 53.21 },
-  ], // default value (aka initial value)
+    { account: "Robinhood", type: "Stock", ticker: "AMD", shares: 100 },
+    // { account: "Robinhood", type: "Stock", ticker: "VBK", shares: 287 },
+    // { account: "Robinhood", type: "Stock", ticker: "VCLT", shares: 50 },
+    { account: "WeBull", type: "Stock", ticker: "VCLT", shares: 25 },
+    { account: "WeBull", type: "Stock", ticker: "VOO", shares: 107 },
+    // { account: "WeBull", type: "Stock", ticker: "VNQ", shares: 210 },
+    // { account: "WeBull", type: "Stock", ticker: "AAPL", shares: 90.23 },
+    // { account: "WeBull", type: "Stock", ticker: "NVDA", shares: 80 },
+    // { account: "WeBull", type: "Stock", ticker: "MSFT", shares: 53.21 },
+    {
+      account: "Coinbase",
+      type: "Crypto",
+      ticker: "bitcoin",
+      shares: 1,
+    },
+  ],
 });

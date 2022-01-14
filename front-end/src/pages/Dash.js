@@ -10,9 +10,10 @@ import {
   historicalAssetsState,
   dateRangeState,
 } from "../recoil_states";
+import fetchCrypto from "../utils/fetchCrypto";
+import fetchStocks from "../utils/fetchStocks";
 
-export default ({ functions }) => {
-  const stocks = httpsCallable(functions, "stocks");
+export default () => {
   const [basePortfolioAssets, setBasePortfolioAssets] = useRecoilState(
     basePortfolioAssetsState
   );
@@ -24,44 +25,53 @@ export default ({ functions }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const setDates = (range) => {
-    if (range[0] == dateRange[0] && range[1] == dateRange[1]) return
-    setDateRange(range)
+  const setDates = async (range) => {
+    if (range[0] == dateRange[0] && range[1] == dateRange[1]) return;
+    setDateRange(range);
     if (range[0] == "" || range[1] == "") return;
     setLoading(true);
     const id = toast.loading("Loading Portfolio...", {});
     let tickers = [];
+    let cryptos = [];
 
-    basePortfolioAssets.forEach((asset) => tickers.push(asset.ticker));
-    stocks({
-      tickers,
-      startDate: range[0],
-      endDate: new Date(range[1] + 1 * 86400000),
-    })
-      .then((result) => {
-        // Read result of the Cloud Function.
-        const data = result.data;
-        setHistoricalAssets(data);
-        setLoading(false);
-        toast.update(id, {
-          render: "Enjoy!",
-          type: "success",
-          isLoading: false,
-          autoClose: 3000,
-          closeButton: null,
-        });
-      })
-      .catch((e) => {
-        toast.update(id, {
-          render: "Unable to load :(",
-          type: "error",
-          isLoading: false,
-          autoClose: null,
-          closeButton: null,
-        });
-        setError("Unable to load :(");
+    basePortfolioAssets.forEach((asset) => {
+      if (asset.type == "Stock") tickers.push(asset.ticker);
+      if (asset.type == "Crypto") cryptos.push(asset.ticker);
+    });
+    try {
+      const stocksBack = await fetchStocks({
+        tickers,
+        startDate: range[0],
+        endDate: new Date(range[1] + 1 * 86400000),
       });
-  }
+
+      const cryptosBack = await fetchCrypto({
+        cryptos,
+        startDate: range[0],
+        endDate: range[1],
+      });
+      const combined = { ...stocksBack, ...cryptosBack };
+      console.log(combined)
+      setHistoricalAssets(combined);
+      setLoading(false);
+      toast.update(id, {
+        render: "Enjoy!",
+        type: "success",
+        isLoading: false,
+        autoClose: 3000,
+        closeButton: null,
+      });
+    } catch (error) {
+      toast.update(id, {
+        render: "Unable to load :(",
+        type: "error",
+        isLoading: false,
+        autoClose: null,
+        closeButton: null,
+      });
+      setError("Unable to load :(");
+    }
+  };
 
   const flatpickr = (
     <div style={{ margin: "0.5rem 0" }}>
@@ -98,10 +108,7 @@ export default ({ functions }) => {
       </button>
       <button
         onClick={() => {
-          setDateRange([
-            new Date(Date.now() - 365 * 10 * 86400000),
-            Date.now(),
-          ]);
+          setDates([new Date(Date.now() - 365 * 10 * 86400000), Date.now()]);
         }}
       >
         Past 10 Years

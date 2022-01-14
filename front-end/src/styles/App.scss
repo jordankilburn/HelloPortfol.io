@@ -97,11 +97,12 @@ body {
     header {
       max-height: 35px;
       min-height: 35px;
-      background-color: #fff;
+      background-color: $sidebar-bg-color;
       padding: 10px;
       display: flex;
       // margin-bottom: 10px;
       border-bottom: 1px solid #efefef;
+      // border-left: 1px solid rgba(179, 184, 212, 0.2);
       h1 {
         display: flex;
         align-items: center;

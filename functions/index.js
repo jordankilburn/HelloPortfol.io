@@ -51,8 +51,8 @@ exports.stocks = functions.https.onCall((data, context) => {
       Object.keys(result).forEach((ticker) => {
         let prices = [];
         result[ticker].forEach(
-          ({ date, open, close /*volume, high, low */ }) => {
-            prices.push({ date: date.toISOString().slice(0,10), open, close });
+          ({ date, close /*volume, high, open, low */ }) => {
+            prices.push({ date: date.toISOString().slice(0,10), close });
           }
         );
         reply[ticker] = prices.reverse();
