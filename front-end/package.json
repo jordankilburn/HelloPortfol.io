@@ -12,6 +12,7 @@
     "@visx/pattern": "^2.1.2",
     "@visx/tooltip": "^2.2.0",
     "@visx/xychart": "^2.2.1",
+    "@vx/scale": "^0.0.199",
     "axios": "^0.24.0",
     "firebase": "^9.6.2",
     "react": "^17.0.2",

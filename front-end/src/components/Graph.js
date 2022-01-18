@@ -5,17 +5,17 @@ import {
   XYChart,
   Tooltip,
   buildChartTheme,
+  AreaStack,
 } from "@visx/xychart";
 import { ParentSize } from "@visx/responsive";
 import { LinearGradient } from "@visx/gradient";
-import { curveCardinal } from "@visx/curve";
+import { curveCardinal, curveLinear } from "@visx/curve";
 import CustomBG from "./CustomChartBackground";
 import numbFormat from "../utils/numbFormat";
 import Pie from "./Pie";
 import toLocaleFixed from "../utils/toLocaleFixed";
 import { useRecoilState } from "recoil";
-import { showWhatState,dateRangeState } from "../recoil_states";
-import { getDaysArray } from "../utils/fetchStocks";
+import { showWhatState, dateRangeState } from "../recoil_states";
 
 const accessors = {
   xAccessor: (d) => new Date(d.date),
@@ -34,59 +34,42 @@ const fundColors = [
 ];
 
 export default ({ historicalAssets, basePortfolioAssets, flatpickr }) => {
-  const [dateRange, setDateRange] = useRecoilState(dateRangeState);
   const [showWhat, setShowWhat] = useRecoilState(showWhatState);
   const [combineAll, setCombineAll] = useState(true);
-  const [netWorth, setNetWorth] = useState([]);
+  const [netWorth, setNetWorth] = useState(null);
 
   useEffect(() => {
     //set what to show
-
+    let totNetWorth = 0;
     let obj = {};
-    let assetsToCombine = [];
-    let combinedTotal = [...getDaysArray(dateRange[0],dateRange[1])];
-    
-    basePortfolioAssets.map((p) => {
+    const sortedAssets = [...basePortfolioAssets].sort((a, b) =>
+      a.ticker.localeCompare(b.ticker)
+    );
+    sortedAssets.map((p) => {
       if (obj[p.ticker]) obj[p.ticker].shares += p.shares;
       else {
         obj[p.ticker] = Object.assign({}, p);
-        obj[p.ticker].show = true;
+        obj[p.ticker].show = showWhat[p.ticker]
+          ? showWhat[p.ticker].show
+          : true;
       }
       if (historicalAssets != null) {
-        const tickerData = findData(p);
-        if (tickerData == null) return
-        //now have historical with shares multiplied
-        
-
-        const newTickerData = tickerData.map((x) => ({
-          close: x.close * obj[p.ticker].shares,
-          date: new Date(x.date).toISOString().slice(0, 10),
-        }));
-        obj[p.ticker].value = newTickerData[newTickerData.length - 1].close;
-        assetsToCombine.push(...newTickerData);
+        const tickerData = findData(p.ticker);
+        if (tickerData == null) return;
+        if (!obj[p.ticker].value) obj[p.ticker].value = 0;
+        obj[p.ticker].value +=
+          tickerData[tickerData.length - 1].close * p.shares;
+        totNetWorth += tickerData[tickerData.length - 1].close * p.shares;
       }
     });
+
     setShowWhat(obj);
-    if (historicalAssets == null) return;
-    const output = assetsToCombine.reduce((accumulator, cur) => {
-      let date = cur.date;
-      let found = accumulator.find((elem) => elem.date === date);
-      if (found) found.close += cur.close;
-      else accumulator.push(cur);
-      return accumulator;
-    }, []);
-    console.log(output)
-    //set net worth data
-    setNetWorth(
-      combinedTotal.sort(function (a, b) {
-        return new Date(a.date) - new Date(b.date);
-      })
-    );
+    setNetWorth(totNetWorth);
   }, [historicalAssets]);
 
-  const findData = (postition) => {
+  const findData = (ticker) => {
     if (historicalAssets == null) return null;
-    return historicalAssets[postition.ticker];
+    return historicalAssets[ticker];
   };
 
   return (
@@ -98,29 +81,51 @@ export default ({ historicalAssets, basePortfolioAssets, flatpickr }) => {
               <div className="item">
                 <h3>Choose Date Range</h3>
                 {flatpickr}
-                {netWorth.length > 0 && (
+                {netWorth && (
                   <>
-                    <h3>
-                      Total Net Worth | $
-                      {toLocaleFixed(netWorth[netWorth.length - 1]?.close)}
-                    </h3>
-                    <span>
-                      <label className="check-container">
-                        Show Breakdown
-                        <input
-                          name={"combine-all"}
-                          type="checkbox"
-                          checked={!combineAll}
-                          onChange={() => {
-                            setCombineAll(!combineAll);
-                          }}
-                        />
-                        <span
-                          className="checkmark"
-                          style={{ backgroundColor: fundColors[0] }}
-                        ></span>
-                      </label>
-                    </span>
+                    <h3>Total Net Worth | ${toLocaleFixed(netWorth)}</h3>
+                    <table>
+                      <tbody>
+                        <tr>
+                          <td>
+                            <label className="check-container">
+                              Stacked
+                              <input
+                                name={"combine-all"}
+                                type="checkbox"
+                                checked={combineAll}
+                                onChange={() => {
+                                  setCombineAll(!combineAll);
+                                }}
+                              />
+                              <span
+                                className="checkmark"
+                                style={{ backgroundColor: fundColors[0] }}
+                              ></span>
+                            </label>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <label className="check-container">
+                              Compared
+                              <input
+                                name={"combine-all"}
+                                type="checkbox"
+                                checked={!combineAll}
+                                onChange={() => {
+                                  setCombineAll(!combineAll);
+                                }}
+                              />
+                              <span
+                                className="checkmark"
+                                style={{ backgroundColor: fundColors[0] }}
+                              ></span>
+                            </label>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </>
                 )}
                 <h3>Portfolio</h3>
@@ -136,12 +141,8 @@ export default ({ historicalAssets, basePortfolioAssets, flatpickr }) => {
                   </thead>
                   <tbody>
                     {Object.keys(showWhat).map((fund, i) => {
-                      const data = findData({ ticker: fund });
-                      const val =
-                        data == null
-                          ? null
-                          : data[data.length - 1]?.close *
-                            showWhat[fund].shares;
+                      const data = findData(fund);
+                      const val = showWhat[fund].value;
                       return (
                         <tr key={i}>
                           <td>
@@ -221,29 +222,47 @@ export default ({ historicalAssets, basePortfolioAssets, flatpickr }) => {
                     tickFormat={(val) => `$${numbFormat(val)}`}
                   />
 
-                  {combineAll ? (
-                    <AnimatedAreaSeries
-                      fill="url('#gradient')"
-                      curve={curveCardinal}
-                      dataKey={"Net Worth"}
-                      data={netWorth}
-                      {...accessors}
-                      fillOpacity={0.4}
-                      lineProps={{ stroke: fundColors[0] }}
-                    />
-                  ) : (
-                    basePortfolioAssets.map((fund, i) => {
-                      if (showWhat[fund.ticker] && showWhat[fund.ticker].show)
+                  {combineAll && (
+                    <AreaStack
+                      curve={curveLinear}
+                      offset={"auto"}
+                      renderLine={true}
+                      order={"reverse"}
+                    >
+                      {Object.keys(showWhat).map((fund, i) => {
+                        if (showWhat[fund] && showWhat[fund].show)
+                          return (
+                            <AnimatedAreaSeries
+                              key={fund}
+                              fill="url('#gradient')"
+                              dataKey={fund}
+                              data={findData(fund) || []}
+                              xAccessor={(d) => new Date(d.date)}
+                              yAccessor={(d) => d.close * showWhat[fund].shares}
+                              fillOpacity={0.4}
+                              lineProps={{
+                                stroke:
+                                  i > fundColors.length - 1
+                                    ? fundColors[fundColors.length - 1]
+                                    : fundColors[i],
+                              }}
+                            />
+                          );
+                      })}
+                    </AreaStack>
+                  )}
+
+                  {!combineAll &&
+                    Object.keys(showWhat).map((fund, i) => {
+                      if (showWhat[fund] && showWhat[fund].show)
                         return (
                           <AnimatedAreaSeries
-                            key={fund.ticker}
+                            key={fund}
                             fill="url('#gradient')"
-                            curve={curveCardinal}
-                            dataKey={fund.ticker}
-                            data={findData(fund)}
-                            // {...accessors}
+                            dataKey={fund}
+                            data={findData(fund) || []}
                             xAccessor={(d) => new Date(d.date)}
-                            yAccessor={(d) => d.close * fund.shares}
+                            yAccessor={(d) => d.close * showWhat[fund].shares}
                             fillOpacity={0.4}
                             lineProps={{
                               stroke:
@@ -253,15 +272,15 @@ export default ({ historicalAssets, basePortfolioAssets, flatpickr }) => {
                             }}
                           />
                         );
-                    })
-                  )}
+                    })}
 
                   <Tooltip
+                  showDatumGlyph
                     // snapTooltipToDatumX
                     // snapTooltipToDatumY
                     showVerticalCrosshair
                     showHorizontalCrosshair
-                    showSeriesGlyphs
+                    // showSeriesGlyphs
                     renderTooltip={({ tooltipData, colorScale }) => {
                       const date = new Date(
                         accessors.xAccessor(tooltipData.nearestDatum.datum)
@@ -271,8 +290,10 @@ export default ({ historicalAssets, basePortfolioAssets, flatpickr }) => {
                       return (
                         <div style={{ fontFamily: "Roboto" }}>
                           <span>{date}</span>
-                          {Object.keys(tooltipData?.datumByKey).map(
+                          {Object.keys(showWhat).map(
                             (fund, i) => {
+                              if (tooltipData?.nearestDatum?.key !== fund || !showWhat[fund].show)
+                                return;
                               const p = basePortfolioAssets.findIndex(
                                 (e) => e.ticker === fund
                               );
@@ -281,17 +302,15 @@ export default ({ historicalAssets, basePortfolioAssets, flatpickr }) => {
                                 accessors.yAccessor(
                                   tooltipData.datumByKey[fund].datum
                                 ) *
-                                (basePortfolioAssets[p]
-                                  ? basePortfolioAssets[p].shares
-                                  : 1);
+                                (showWhat[fund] ? showWhat[fund].shares : 1);
                               return (
                                 <div key={fund}>
                                   <span
                                     style={{
                                       color:
-                                        p > fundColors.length - 1
+                                        i > fundColors.length - 1
                                           ? fundColors[fundColors.length - 1]
-                                          : fundColors[p],
+                                          : fundColors[i],
                                       textDecoration:
                                         tooltipData?.nearestDatum?.key === fund
                                           ? "underline"
@@ -322,7 +341,7 @@ export default ({ historicalAssets, basePortfolioAssets, flatpickr }) => {
                 parent={parent}
                 showWhat={showWhat}
                 fundColors={fundColors}
-                netWorth={netWorth[netWorth.length - 1]?.close}
+                netWorth={netWorth}
               />
             )}
           </ParentSize>

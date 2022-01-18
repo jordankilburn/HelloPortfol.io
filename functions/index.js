@@ -24,7 +24,7 @@ exports.stocks = functions.https.onCall((data, context) => {
   // const email = context.auth.token.email || null;
   //   functions.logger.info("Hello logs!", {structuredData: true});
 
-  if (!data || !data.tickers || !data.startDate || !data.endDate) {
+  if (!data || !data.tickers || !data.startDate || !data.endDate || !data.period) {
     // Throwing an HttpsError so that the client gets the error details.
     throw new functions.https.HttpsError(
       "invalid-argument",
@@ -35,28 +35,38 @@ exports.stocks = functions.https.onCall((data, context) => {
   const date1 = new Date(data.startDate);
   const date2 = new Date(data.endDate);
   const diffDays = Math.ceil(Math.abs(date2 - date1) / (1000 * 60 * 60 * 24));
-  let period = "d";
-  if (diffDays > 368) period = "w";
-  if (diffDays > 365 * 5) period = "m";
+  let {period} = data; //d,w,m 
   const SYMBOLS = data.tickers;
   let reply = {};
   return yahooFinance
     .historical({
       symbols: SYMBOLS,
-      from: data.startDate,
-      to: data.endDate,
+      from: date1,
+      to: new Date(date2.setDate(date2.getDate() + 1)), // add 1 day to cover
       period,
     })
     .then(function (result) {
       Object.keys(result).forEach((ticker) => {
         let prices = [];
         result[ticker].forEach(
-          ({ date, close /*volume, high, open, low */ }) => {
-            prices.push({ date: date.toISOString().slice(0,10), close });
+          ({ date, close /*volume, high, open, low */ }, i) => {
+            prices.push({ date: date.toISOString().slice(0, 10), close });
           }
         );
+
         reply[ticker] = prices.reverse();
       });
       return reply;
     });
 });
+
+const getDaysArray = (startDate, endDate) => {
+  for (
+    var arr = [], dt = new Date(startDate);
+    dt <= new Date(endDate);
+    dt.setDate(dt.getDate() + 1)
+  ) {
+    arr.push({ date: new Date(dt), close: null });
+  }
+  return arr;
+};

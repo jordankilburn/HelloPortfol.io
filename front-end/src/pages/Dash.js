@@ -10,8 +10,7 @@ import {
   historicalAssetsState,
   dateRangeState,
 } from "../recoil_states";
-import fetchCrypto from "../utils/fetchCrypto";
-import fetchStocks from "../utils/fetchStocks";
+import fetchAssets from "../utils/fetchAssets";
 
 export default () => {
   const [basePortfolioAssets, setBasePortfolioAssets] = useRecoilState(
@@ -26,32 +25,19 @@ export default () => {
   const [error, setError] = useState(null);
 
   const setDates = async (range) => {
+
     if (range[0] == dateRange[0] && range[1] == dateRange[1]) return;
     setDateRange(range);
-    if (range[0] == "" || range[1] == "") return;
+    if (range[0] == "" || range[1] == "" || range.length !== 2) return;
     setLoading(true);
     const id = toast.loading("Loading Portfolio...", {});
-    let tickers = [];
-    let cryptos = [];
 
-    basePortfolioAssets.forEach((asset) => {
-      if (asset.type == "Stock") tickers.push(asset.ticker);
-      if (asset.type == "Crypto") cryptos.push(asset.ticker);
-    });
     try {
-      const stocksBack = await fetchStocks({
-        tickers,
-        startDate: range[0],
-        endDate: new Date(range[1] + 1 * 86400000),
-      });
-
-      const cryptosBack = await fetchCrypto({
-        cryptos,
+      const combined = await fetchAssets({
+        basePortfolioAssets,
         startDate: range[0],
         endDate: range[1],
       });
-      const combined = { ...stocksBack, ...cryptosBack };
-      console.log(combined)
       setHistoricalAssets(combined);
       setLoading(false);
       toast.update(id, {
@@ -74,44 +60,48 @@ export default () => {
   };
 
   const flatpickr = (
-    <div style={{ margin: "0.5rem 0" }}>
+    <div style={{ margin: "0.5rem 0", textAlign:"center" }}>
       {/* <Flatpickr
+        style={{ margin: 5 }}
         options={{
           mode: "range",
           dateFormat: "Y-m-d",
+          maxDate:new Date()
         }}
         value={dateRange}
+        
         onChange={(date) => {
           setDates(date);
         }}
-      /> */}
+      />
+      <br /> */}
       <button
         onClick={() => {
-          setDates([new Date(Date.now() - 30 * 86400000), Date.now()]);
+          setDates([new Date(Date.now() - 30 * 86400000), new Date()]);
         }}
       >
         Past 30 Days
       </button>
       <button
         onClick={() => {
-          setDates([new Date(Date.now() - 90 * 86400000), Date.now()]);
+          setDates([new Date(Date.now() - 90 * 86400000), new Date()]);
         }}
       >
         Past 90 Days
       </button>
       <button
         onClick={() => {
-          setDates([new Date(Date.now() - 365 * 86400000), Date.now()]);
+          setDates([new Date(Date.now() - 365 * 86400000), new Date()]);
         }}
       >
         Past 12 Months
       </button>
       <button
         onClick={() => {
-          setDates([new Date(Date.now() - 365 * 10 * 86400000), Date.now()]);
+          setDates([new Date(Date.now() - 365 * 5 * 86400000), new Date()]);
         }}
       >
-        Past 10 Years
+        Past 5 Years
       </button>
     </div>
   );
