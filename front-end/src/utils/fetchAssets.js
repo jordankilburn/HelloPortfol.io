@@ -18,6 +18,7 @@ const functions = getFunctions(app);
 connectFunctionsEmulator(functions, "localhost", 5001);
 
 const stocks = httpsCallable(functions, "stocks");
+
 const baseAPI = "https://api.coingecko.com/api/v3/coins";
 
 export default async ({ basePortfolioAssets, startDate, endDate }) => {

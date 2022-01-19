@@ -2,11 +2,16 @@ import { atom } from "recoil";
 
 export const showWhatState = atom({
   key: "showWhatState", // unique ID (with respect to other atoms/selectors)
-  default: {}, // default value (aka initial value)
+  default: [], // default value (aka initial value)
 });
 
 export const historicalAssetsState = atom({
   key: "historicalAssetsState", // unique ID (with respect to other atoms/selectors)
+  default: {}, // default value (aka initial value)
+});
+
+export const normalizedAssetsState = atom({
+  key: "normalizedAssetsState", // unique ID (with respect to other atoms/selectors)
   default: {}, // default value (aka initial value)
 });
 
@@ -16,6 +21,16 @@ export const dateRangeState = atom({
     new Date(Date.now() - 30 * 86400000), //past 30 days
     Date.now(),
   ],
+});
+
+export const combineAllState = atom({
+  key: "combineAllState", // unique ID (with respect to other atoms/selectors)
+  default: true,
+});
+
+export const netWorthState = atom({
+  key: "netWorthState", // unique ID (with respect to other atoms/selectors)
+  default: [],
 });
 
 export const basePortfolioAssetsState = atom({

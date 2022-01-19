@@ -61,7 +61,7 @@ export default () => {
 
   const flatpickr = (
     <div style={{ margin: "0.5rem 0", textAlign:"center" }}>
-      {/* <Flatpickr
+      <Flatpickr
         style={{ margin: 5 }}
         options={{
           mode: "range",
@@ -74,7 +74,7 @@ export default () => {
           setDates(date);
         }}
       />
-      <br /> */}
+      <br />
       <button
         onClick={() => {
           setDates([new Date(Date.now() - 30 * 86400000), new Date()]);

@@ -14,7 +14,7 @@ export default function Example({
   parent,
   showWhat,
   fundColors,
-  netWorth,
+  netWorth = [],
   margin = defaultMargin,
 }) {
   const [active, setActive] = useState(null);
@@ -27,6 +27,7 @@ export default function Example({
   const top = centerY + margin.top;
   const left = centerX + margin.left;
   if (Object.keys(showWhat).length < 1) return null;
+  const todayNetWorth = netWorth[netWorth.length-1]?netWorth[netWorth.length-1].close:0
 
   return (
     <svg width={width} height={300}>
@@ -102,7 +103,7 @@ export default function Example({
                       fontSize={"0.75rem"}
                       textAnchor="middle"
                     >
-                      ({`${(value/netWorth*100).toFixed(1)}%`})
+                      ({`${(value/todayNetWorth*100).toFixed(1)}%`})
                     </text>
                     </>
                   )}

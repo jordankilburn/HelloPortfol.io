@@ -59,14 +59,3 @@ exports.stocks = functions.https.onCall((data, context) => {
       return reply;
     });
 });
-
-const getDaysArray = (startDate, endDate) => {
-  for (
-    var arr = [], dt = new Date(startDate);
-    dt <= new Date(endDate);
-    dt.setDate(dt.getDate() + 1)
-  ) {
-    arr.push({ date: new Date(dt), close: null });
-  }
-  return arr;
-};
