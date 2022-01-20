@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { httpsCallable } from "firebase/functions";
 import "flatpickr/dist/themes/airbnb.css";
 import Flatpickr from "react-flatpickr";
 import Graph from "../components/Graph";
