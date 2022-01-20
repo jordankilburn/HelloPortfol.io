@@ -46,10 +46,7 @@ app.get("/", (req, res) => {
   res.send("hello there :)");
 });
 
-app.listen(process.env.PORT || 5000, () => {
-  const port = server.address().port;
-  console.log(`Express is working on port ${port}`);
-});
+app.listen(process.env.PORT || 5000, () => console.log("Server is running..."));
 
 const historical = (data) => {
   return new Promise(async function (resolve, reject) {
