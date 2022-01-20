@@ -31,7 +31,7 @@ const corsOptions = {
 
 app.use(compression());
 app.use(express.json());
-app.use(cors(corsOptions));
+app.use(cors());
 
 app.post("/historical", async (req, res, next) => {
   try {
