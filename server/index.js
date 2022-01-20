@@ -4,7 +4,6 @@ import express from "express";
 import cors from "cors";
 
 const app = express();
-const port = 5000;
 
 const whitelist = ["http://localhost:3000"]; //white list consumers
 const corsOptions = {
@@ -43,8 +42,13 @@ app.post("/historical", async (req, res, next) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`);
+app.get("/", (req, res) => {
+  res.send("hello there :)");
+});
+
+app.listen(process.env.PORT || 5000, () => {
+  const port = server.address().port;
+  console.log(`Express is working on port ${port}`);
 });
 
 const historical = (data) => {

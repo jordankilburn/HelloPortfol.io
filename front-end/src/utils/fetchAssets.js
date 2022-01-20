@@ -1,9 +1,10 @@
 import axios from "axios";
 
 const baseStockAPI =
-  process.env.NODE_ENV === "development"
-    ? "http://localhost:5000/"
-    : "somedomain.com/";
+  // process.env.NODE_ENV === "development"
+  //   ? "http://localhost:5000/"
+  //   :
+  "https://portfolio-tracker-express.herokuapp.com/";
 const baseCrypyoAPI = "https://api.coingecko.com/api/v3/coins";
 
 export default async ({ basePortfolioAssets, startDate, endDate }) => {
@@ -28,12 +29,16 @@ export default async ({ basePortfolioAssets, startDate, endDate }) => {
     const fetchStocks = () => {
       return new Promise(async function (resolve, reject) {
         const res = await axios
-          .post(baseStockAPI + "historical/", {
-            tickers,
-            startDate,
-            endDate,
-            period: "d",
-          })
+          .post(
+            baseStockAPI + "historical/",
+            {
+              tickers,
+              startDate,
+              endDate,
+              period: "d",
+            },
+            { headers: { "Content-Type": "application/json" } }
+          )
           .catch((e) => {
             return reject(e);
           });
