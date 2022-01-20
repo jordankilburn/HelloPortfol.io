@@ -30,7 +30,7 @@ const corsOptions = {
 
 app.use(compression());
 app.use(express.json());
-app.use(cors());
+app.use(cors(corsOptions));
 
 app.post("/historical", async (req, res, next) => {
   try {
@@ -60,31 +60,16 @@ const historical = (data) => {
       return reject("Include all args");
     }
 
-    const date1 = new Date(data.startDate);
     const date2 = new Date(data.endDate);
-    let { period } = data; //d,w,m
-    const SYMBOLS = data.tickers;
-    let reply = {};
     return yahooFinance
       .historical({
-        symbols: SYMBOLS,
-        from: date1,
+        symbols: data.tickers,
+        from: new Date(data.startDate),
         to: new Date(date2.setDate(date2.getDate() + 1)), // add 1 day to cover
-        period,
+        period: data.period, //d,w,m
       })
       .then(function (result) {
-        Object.keys(result).forEach((ticker) => {
-          let prices = [];
-          result[ticker].forEach(
-            ({ date, close /*volume, high, open, low */ }, i) => {
-              prices.push({ date: date.toISOString().slice(0, 10), close });
-            }
-          );
-
-          reply[ticker] = prices.reverse();
-        });
-
-        return resolve(reply);
+        return resolve(result);
       })
       .catch((e) => {
         return reject(e);

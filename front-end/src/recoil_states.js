@@ -33,6 +33,11 @@ export const netWorthState = atom({
   default: [],
 });
 
+export const sortedByState = atom({
+  key: "sortedByState", // unique ID (with respect to other atoms/selectors)
+  default: "Value",
+});
+
 export const basePortfolioAssetsState = atom({
   key: "basePortfolioAssetsState", // unique ID (with respect to other atoms/selectors)
   default: [

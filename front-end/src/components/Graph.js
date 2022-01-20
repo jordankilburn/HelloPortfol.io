@@ -20,6 +20,7 @@ import {
   normalizedAssetsState,
   netWorthState,
   combineAllState,
+  sortedByState
 } from "../recoil_states";
 
 const accessors = {
@@ -147,7 +148,7 @@ export default ({ historicalAssets, basePortfolioAssets, flatpickr }) => {
   );
   const [combineAll, setCombineAll] = useRecoilState(combineAllState);
   const [netWorth, setNetWorth] = useRecoilState(netWorthState);
-  const [sortedBy, setSortedBy] = useState("Value");
+  const [sortedBy, setSortedBy] = useRecoilState(sortedByState);
   useEffect(() => {
     if (historicalAssets != null) {
       let newNetworth = [];
@@ -207,7 +208,7 @@ export default ({ historicalAssets, basePortfolioAssets, flatpickr }) => {
       }
     }
 
-    setShowWhat(newShowWhat.sort((a, b) => b.value - a.value));
+    setShowWhat(newShowWhat);
   }, [historicalAssets]);
 
   const sortBy = (sortType) => {
@@ -235,15 +236,13 @@ export default ({ historicalAssets, basePortfolioAssets, flatpickr }) => {
         break;
 
       default:
-        return
+        return;
     }
     setSortedBy(sortedBy === "asc" ? "desc" : "asc");
     setShowWhat(newSort);
   };
 
   const findNormalizedData = (ticker) => {
-    console.log(ticker, normalizedAssets[ticker]);
-
     return normalizedAssets[ticker];
   };
 
@@ -314,92 +313,93 @@ export default ({ historicalAssets, basePortfolioAssets, flatpickr }) => {
                 </>
 
                 <h3>Portfolio</h3>
-
-                <table style={{ width: "100%" }}>
-                  <thead>
-                    <tr>
-                      <th>
-                        <label className="check-container">
-                        Asset
-                          <input
-                            name={"combine-all"}
-                            type="checkbox"
-                            checked={
-                              showWhat.findIndex((x) => x.show === false) === -1
-                            }
-                            onChange={(e) => {
-                              let newShow = [];
-                              showWhat.forEach((fund, i) => {
-                                newShow[i] = {
-                                  ...fund,
-                                  show: e.target.checked,
-                                };
-                              });
-                              setShowWhat(newShow);
-                            }}
-                          />
-                          <span
-                            className="checkmark"
-                            style={{ backgroundColor: "#000" }}
-                          ></span>
-                          
-                        </label>
-                        
-                      </th>
-                      <th onClick={() => sortBy("Shares")}>Shares</th>
-                      <th onClick={() => sortBy("Value")}>Value</th>
-                      <th onClick={() => sortBy("ROI")}>ROI</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {showWhat.map((fund, i) => {
-                      return (
-                        <tr key={i}>
-                          <td>
-                            <label className="check-container">
-                              {fund.ticker}
-                              <input
-                                name={fund}
-                                type="checkbox"
-                                checked={fund.show}
-                                onChange={() => {
-                                  let newShow = [];
-                                  showWhat.forEach((x, j) => {
-                                    newShow[j] =
-                                      i === j
-                                        ? {
-                                            ...x,
-                                            show: !fund.show,
-                                          }
-                                        : x;
-                                  });
-                                  setShowWhat(newShow);
-                                }}
-                              />
-                              <span
-                                className="checkmark"
-                                style={{
-                                  backgroundColor:
-                                    i > fundColors.length - 1
-                                      ? fundColors[fundColors.length - 1]
-                                      : fundColors[i],
-                                }}
-                              ></span>
-                            </label>
-                          </td>
-                          <td>{toLocaleFixed(fund.shares, 3)}</td>
-                          <td> ${toLocaleFixed(fund.value)}</td>
-                          <td> {toLocaleFixed(fund.roi)}%</td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                <div className="table-wrapper">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>
+                          <label className="check-container">
+                            Asset
+                            <input
+                              name={"combine-all"}
+                              type="checkbox"
+                              checked={
+                                showWhat.findIndex((x) => x.show === false) ===
+                                -1
+                              }
+                              onChange={(e) => {
+                                let newShow = [];
+                                showWhat.forEach((fund, i) => {
+                                  newShow[i] = {
+                                    ...fund,
+                                    show: e.target.checked,
+                                  };
+                                });
+                                setShowWhat(newShow);
+                              }}
+                            />
+                            <span
+                              className="checkmark"
+                              style={{ backgroundColor: "#000" }}
+                            ></span>
+                          </label>
+                        </th>
+                        <th onClick={() => sortBy("Shares")}>Shares</th>
+                        <th onClick={() => sortBy("Value")}>Value</th>
+                        <th onClick={() => sortBy("ROI")}>ROI</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {showWhat.map((fund, i) => {
+                        return (
+                          <tr key={i}>
+                            <td>
+                              <label className="check-container">
+                                {fund.ticker}
+                                <input
+                                  name={fund}
+                                  type="checkbox"
+                                  checked={fund.show}
+                                  onChange={() => {
+                                    let newShow = [];
+                                    showWhat.forEach((x, j) => {
+                                      newShow[j] =
+                                        i === j
+                                          ? {
+                                              ...x,
+                                              show: !fund.show,
+                                            }
+                                          : x;
+                                    });
+                                    setShowWhat(newShow);
+                                  }}
+                                />
+                                <span
+                                  className="checkmark"
+                                  style={{
+                                    backgroundColor:
+                                      i > fundColors.length - 1
+                                        ? fundColors[fundColors.length - 1]
+                                        : fundColors[i],
+                                  }}
+                                ></span>
+                              </label>
+                            </td>
+                            <td>{toLocaleFixed(fund.shares, 3)}</td>
+                            <td> ${toLocaleFixed(fund.value)}</td>
+                            <td> {toLocaleFixed(fund.roi)}%</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>
         </div>
         <div className="item">
+          <h3>{combineAll?"Net Worth":"Compare Assets"} Graph</h3>
           <ParentSize style={{ paddingLeft: 0, paddingRight: 0 }}>
             {(parent) => {
               return (
@@ -408,7 +408,7 @@ export default ({ historicalAssets, basePortfolioAssets, flatpickr }) => {
                   parentHeight={parent.height}
                   parentTop={parent.top}
                   parentLeft={parent.left}
-                  height={400}
+                  height={350}
                   xScale={{
                     type: "time",
                   }}

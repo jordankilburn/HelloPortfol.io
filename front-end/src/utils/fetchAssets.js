@@ -1,10 +1,9 @@
 import axios from "axios";
 
 const baseStockAPI =
-  // process.env.NODE_ENV === "development"
-  //   ? "http://localhost:5000/"
-  //   :
-  "https://portfolio-tracker-express.herokuapp.com/";
+  process.env.NODE_ENV === "development"
+    ? "http://localhost:5000/"
+    : "https://portfolio-tracker-express.herokuapp.com/";
 const baseCrypyoAPI = "https://api.coingecko.com/api/v3/coins";
 
 export default async ({ basePortfolioAssets, startDate, endDate }) => {
@@ -29,20 +28,18 @@ export default async ({ basePortfolioAssets, startDate, endDate }) => {
     const fetchStocks = () => {
       return new Promise(async function (resolve, reject) {
         const res = await axios
-          .post(
-            baseStockAPI + "historical/",
-            {
-              tickers,
-              startDate,
-              endDate,
-              period: "d",
-            },
-            { headers: { "Content-Type": "application/json" } }
-          )
+          .post(baseStockAPI + "historical/", {
+            tickers,
+            startDate,
+            endDate,
+            period: "d",
+          })
           .catch((e) => {
             return reject(e);
           });
-        if (res) resolve(fillAllDays({ stocks: res.data, startDate, endDate }));
+        if (res) {
+          resolve(fillAllDays({ stocks: res.data, startDate, endDate }));
+        }
       });
     };
 
@@ -123,12 +120,16 @@ export const fillAllDays = ({ stocks, startDate, endDate }) => {
   const listOfDays = getDaysArray(startDate, endDate);
   let newStocks = {};
   Object.keys(stocks).forEach((ticker) => {
-    const a = stocks[ticker];
+    const a = stocks[ticker].reverse();
     let res = [];
 
     for (let i = 0, j = 0; i < listOfDays.length; i++) {
       if (!a[j]) continue;
-      let close = listOfDays[i] === a[j].date ? a[j++].close : null;
+      let thisDate = new Date(a[j].date).toISOString().slice(0, 10)
+      let close =
+        listOfDays[i] === thisDate
+          ? a[j++].close
+          : null;
       if (close == null) {
         close = a[j - 1] ? a[j - 1].close : a[j + 1] ? a[j + 1].close : null;
       }

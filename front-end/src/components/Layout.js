@@ -24,11 +24,15 @@ function Layout({ functions }) {
       <Aside toggled={toggled} handleToggleSidebar={handleToggleSidebar} />
       <main>
         <Topbar handleToggleSidebar={handleToggleSidebar} />
+        <div className="content">
+
         <Routes>
           <Route path="/" element={<Dash functions={functions} />} />
           <Route path="manage" element={<Manage />} />
         </Routes>
-        <Footer />
+        {/* <Footer /> */}
+        </div>
+        
       </main>
     </div>
   );
