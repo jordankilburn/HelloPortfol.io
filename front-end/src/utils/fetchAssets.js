@@ -1,25 +1,10 @@
 import axios from "axios";
 
-import { initializeApp } from "firebase/app";
-import {
-  getFunctions,
-  connectFunctionsEmulator,
-  httpsCallable,
-} from "firebase/functions";
-
-// Initialize Firebase
-const app = initializeApp({
-  apiKey: "AIzaSyCqlSD6wS8yyE4Ai56yNYd079LUWiCuOIc",
-  authDomain: "track-portfolio.firebaseapp.com",
-  projectId: "track-portfolio",
-});
-const functions = getFunctions(app);
-//remove below on PROD
-connectFunctionsEmulator(functions, "localhost", 5001);
-
-const stocks = httpsCallable(functions, "stocks");
-
-const baseAPI = "https://api.coingecko.com/api/v3/coins";
+const baseStockAPI =
+  process.env.NODE_ENV === "development"
+    ? "http://localhost:5000/"
+    : "somedomain.com/";
+const baseCrypyoAPI = "https://api.coingecko.com/api/v3/coins";
 
 export default async ({ basePortfolioAssets, startDate, endDate }) => {
   return new Promise(async function (resolve, reject) {
@@ -42,14 +27,17 @@ export default async ({ basePortfolioAssets, startDate, endDate }) => {
 
     const fetchStocks = () => {
       return new Promise(async function (resolve, reject) {
-        const { data } = await stocks({
-          tickers,
-          startDate,
-          endDate,
-          period: "d",
-        }).catch((e) => reject(e));
-
-        resolve(fillAllDays({ stocks: data, startDate, endDate }));
+        const res = await axios
+          .post(baseStockAPI + "historical/", {
+            tickers,
+            startDate,
+            endDate,
+            period: "d",
+          })
+          .catch((e) => {
+            return reject(e);
+          });
+        if (res) resolve(fillAllDays({ stocks: res.data, startDate, endDate }));
       });
     };
 
@@ -62,7 +50,7 @@ export default async ({ basePortfolioAssets, startDate, endDate }) => {
         for (let i = 0; i < cryptos.length; i++) {
           const coin = cryptos[i];
           const thisCoinRaw = await axios.get(
-            `${baseAPI}/${coin}/market_chart?vs_currency=usd&days=max`
+            `${baseCrypyoAPI}/${coin}/market_chart?vs_currency=usd&days=max`
           );
           if (thisCoinRaw.data && thisCoinRaw.data.prices) {
             const prices = thisCoinRaw.data.prices;
@@ -86,7 +74,7 @@ export default async ({ basePortfolioAssets, startDate, endDate }) => {
 
     try {
       const combined = { ...(await fetchStocks()), ...(await fetchCrypto()) };
-      
+
       let reply = {};
       if (period !== "d") {
         Object.keys(combined).map((ticker, i) => {
@@ -102,7 +90,7 @@ export default async ({ basePortfolioAssets, startDate, endDate }) => {
           reply[ticker][reply[ticker].length - 1] =
             combined[ticker][combined[ticker].length - 1];
         });
-      } else reply = combined
+      } else reply = combined;
 
       return resolve(reply);
     } catch (error) {
@@ -132,7 +120,7 @@ export const fillAllDays = ({ stocks, startDate, endDate }) => {
   Object.keys(stocks).forEach((ticker) => {
     const a = stocks[ticker];
     let res = [];
-    
+
     for (let i = 0, j = 0; i < listOfDays.length; i++) {
       if (!a[j]) continue;
       let close = listOfDays[i] === a[j].date ? a[j++].close : null;
