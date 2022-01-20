@@ -15,5 +15,8 @@
     "express": "^4.17.2",
     "yahoo-finance": "^0.3.7"
   },
-  "type": "module"
+  "type": "module",
+  "engines": {
+    "node": "16.x"
+  }
 }
