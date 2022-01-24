@@ -5,7 +5,7 @@ import {
   XYChart,
   Tooltip,
   buildChartTheme,
-  AreaStack,
+  // AreaStack,
 } from "@visx/xychart";
 import { ParentSize } from "@visx/responsive";
 import { LinearGradient } from "@visx/gradient";
@@ -268,48 +268,7 @@ export default ({ historicalAssets, basePortfolioAssets, flatpickr }) => {
                         netWorth[netWorth.length - 1].close
                     )}
                   </h3>
-                  <table>
-                    <tbody>
-                      <tr>
-                        <td>
-                          <label className="check-container">
-                            Show Net Worth
-                            <input
-                              name={"combine-all"}
-                              type="checkbox"
-                              checked={combineAll}
-                              onChange={() => {
-                                setCombineAll(!combineAll);
-                              }}
-                            />
-                            <span
-                              className="checkmark"
-                              style={{ backgroundColor: fundColors[0] }}
-                            ></span>
-                          </label>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <label className="check-container">
-                            Show Comparison
-                            <input
-                              name={"combine-all"}
-                              type="checkbox"
-                              checked={!combineAll}
-                              onChange={() => {
-                                setCombineAll(!combineAll);
-                              }}
-                            />
-                            <span
-                              className="checkmark"
-                              style={{ backgroundColor: fundColors[0] }}
-                            ></span>
-                          </label>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
+                 
                 </>
 
                 <h3>Portfolio</h3>
@@ -400,6 +359,48 @@ export default ({ historicalAssets, basePortfolioAssets, flatpickr }) => {
         </div>
         <div className="item">
           <h3>{combineAll?"Net Worth":"Compare Assets"} Graph</h3>
+          <table>
+                    <tbody>
+                      <tr>
+                        <td>
+                          <label className="check-container">
+                            Show Net Worth
+                            <input
+                              name={"combine-all"}
+                              type="checkbox"
+                              checked={combineAll}
+                              onChange={() => {
+                                setCombineAll(!combineAll);
+                              }}
+                            />
+                            <span
+                              className="checkmark"
+                              style={{ backgroundColor: fundColors[0] }}
+                            ></span>
+                          </label>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <label className="check-container">
+                            Show Comparison
+                            <input
+                              name={"combine-all"}
+                              type="checkbox"
+                              checked={!combineAll}
+                              onChange={() => {
+                                setCombineAll(!combineAll);
+                              }}
+                            />
+                            <span
+                              className="checkmark"
+                              style={{ backgroundColor: fundColors[0] }}
+                            ></span>
+                          </label>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
           <ParentSize style={{ paddingLeft: 0, paddingRight: 0 }}>
             {(parent) => {
               return (
@@ -443,6 +444,7 @@ export default ({ historicalAssets, basePortfolioAssets, flatpickr }) => {
                     <AnimatedAreaSeries
                       fill="url('#gradient')"
                       dataKey={"Net Worth"}
+                      curve={curveCardinal}
                       data={netWorth || []}
                       xAccessor={(d) => new Date(d.date)}
                       yAccessor={(d) => d.close}
@@ -457,6 +459,7 @@ export default ({ historicalAssets, basePortfolioAssets, flatpickr }) => {
                         return (
                           <AnimatedAreaSeries
                             key={i}
+                            curve={curveCardinal}
                             fill="url('#gradient')"
                             dataKey={fund.ticker}
                             data={findNormalizedData(fund.ticker) || []}
