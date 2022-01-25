@@ -12,7 +12,7 @@ const defaultMargin = { top: 20, right: 20, bottom: 20, left: 20 };
 
 export default function Example({
   parent,
-  showWhat,
+  basePortfolioAssets,
   fundColors,
   netWorth = [],
   margin = defaultMargin,
@@ -26,8 +26,10 @@ export default function Example({
   const centerX = innerWidth / 2;
   const top = centerY + margin.top;
   const left = centerX + margin.left;
-  if (Object.keys(showWhat).length < 1) return null;
-  const todayNetWorth = netWorth[netWorth.length-1]?netWorth[netWorth.length-1].close:0
+  if (basePortfolioAssets.length < 1) return null;
+  const todayNetWorth = netWorth[netWorth.length - 1]
+    ? netWorth[netWorth.length - 1].close
+    : 0;
 
   return (
     <svg width={width} height={300}>
@@ -35,7 +37,7 @@ export default function Example({
       <Group top={top} left={left}>
         <Pie
           height={300}
-          data={Object.keys(showWhat).map((key) => showWhat[key].show && showWhat[key])}
+          data={basePortfolioAssets.filter((x) => x.show === true)}
           pieValue={(d) => d.value}
           outerRadius={radius}
           outerRadius={140}
@@ -47,7 +49,7 @@ export default function Example({
         >
           {(pie) => {
             return pie.arcs.map((arc, i) => {
-              const { ticker, value } = arc.data;
+              const { ticker, value, nickname } = arc.data;
               const [centroidX, centroidY] = pie.path.centroid(arc);
               const hasSpaceForLabel = arc.endAngle - arc.startAngle >= 0.4;
               const arcPath = pie.path(arc);
@@ -67,44 +69,45 @@ export default function Example({
                       x={centroidX}
                       y={centroidY}
                       dy=".33em"
-                      fill="#ffffff"
+                      fill="#000"
                       fontSize={"0.75rem"}
                       textAnchor="middle"
                     >
-                      {ticker}
+                      {nickname || ticker}
                     </text>
                   )}
                   {active && active.ticker == ticker && (
-                    <><text
-                      x={0}
-                      y={0}
-                      dy="-1.3em"
-                      // fill="#ffffff"
-                      fontSize={"0.75em"}
-                      textAnchor="middle"
-                    >
-                      {ticker}
-                    </text>
-                    <text
-                      x={0}
-                      y={0}
-                      dy="0"
-                      fill={arcFill}
-                      fontSize={"1rem"}
-                      textAnchor="middle"
-                    >
-                      ${toLocaleFixed(value)}
-                    </text>
-                    <text
-                      x={0}
-                      y={0}
-                      dy="1.3em"
-                      // fill="#ffffff"
-                      fontSize={"0.75rem"}
-                      textAnchor="middle"
-                    >
-                      ({`${(value/todayNetWorth*100).toFixed(1)}%`})
-                    </text>
+                    <>
+                      <text
+                        x={0}
+                        y={0}
+                        dy="-1.3em"
+                        // fill="#ffffff"
+                        fontSize={"0.75em"}
+                        textAnchor="middle"
+                      >
+                        {nickname || ticker}
+                      </text>
+                      <text
+                        x={0}
+                        y={0}
+                        dy="0"
+                        fill={arcFill}
+                        fontSize={"1rem"}
+                        textAnchor="middle"
+                      >
+                        ${toLocaleFixed(value)}
+                      </text>
+                      <text
+                        x={0}
+                        y={0}
+                        dy="1.3em"
+                        // fill="#ffffff"
+                        fontSize={"0.75rem"}
+                        textAnchor="middle"
+                      >
+                        ({`${((value / todayNetWorth) * 100).toFixed(1)}%`})
+                      </text>
                     </>
                   )}
                 </g>

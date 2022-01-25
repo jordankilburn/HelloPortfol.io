@@ -24,7 +24,6 @@ export default () => {
   const [error, setError] = useState(null);
 
   const setDates = async (range) => {
-
     if (range[0] == dateRange[0] && range[1] == dateRange[1]) return;
     setDateRange(range);
     if (range[0] == "" || range[1] == "" || range.length !== 2) return;
@@ -39,6 +38,8 @@ export default () => {
       });
       setHistoricalAssets(combined);
       setLoading(false);
+      toast.clearWaitingQueue();
+      toast.dismiss();
       toast.update(id, {
         render: "Enjoy!",
         type: "success",
@@ -59,22 +60,23 @@ export default () => {
   };
 
   const flatpickr = (
-    <div style={{ margin: "0.5rem 0", textAlign:"center" }}>
+    <div style={{ margin: "0.5rem 0", textAlign: "center" }}>
       <Flatpickr
+        disabled={loading}
         style={{ margin: 5 }}
         options={{
           mode: "range",
           dateFormat: "Y-m-d",
-          maxDate:new Date()
+          maxDate: new Date(),
         }}
         value={dateRange}
-        
         onChange={(date) => {
           setDates(date);
         }}
       />
       <br />
       <button
+        disabled={loading}
         onClick={() => {
           setDates([new Date(Date.now() - 30 * 86400000), new Date()]);
         }}
@@ -82,6 +84,7 @@ export default () => {
         Past 30 Days
       </button>
       <button
+        disabled={loading}
         onClick={() => {
           setDates([new Date(Date.now() - 90 * 86400000), new Date()]);
         }}
@@ -89,6 +92,7 @@ export default () => {
         Past 90 Days
       </button>
       <button
+        disabled={loading}
         onClick={() => {
           setDates([new Date(Date.now() - 365 * 86400000), new Date()]);
         }}
@@ -96,6 +100,7 @@ export default () => {
         Past 12 Months
       </button>
       <button
+        disabled={loading}
         onClick={() => {
           setDates([new Date(Date.now() - 365 * 5 * 86400000), new Date()]);
         }}
@@ -109,6 +114,7 @@ export default () => {
       historicalAssets={historicalAssets}
       basePortfolioAssets={basePortfolioAssets}
       flatpickr={flatpickr}
+      loading={loading}
     />
   );
 };

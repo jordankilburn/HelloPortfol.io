@@ -59,6 +59,8 @@ const historical = (data) => {
     ) {
       return reject("Include all args");
     }
+    
+    if (data.tickers.length < 1) return resolve({});
 
     const date2 = new Date(data.endDate);
     return yahooFinance

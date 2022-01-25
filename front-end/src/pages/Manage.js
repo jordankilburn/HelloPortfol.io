@@ -1,32 +1,32 @@
 import { useState } from "react";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import { Modal } from "react-responsive-modal";
 import { toast } from "react-toastify";
-import {
-  showWhatState,
-  basePortfolioAssetsState,
-  historicalAssetsState,
-} from "../recoil_states";
+import { basePortfolioAssetsState, sortedByState } from "../recoil_states";
 import toLocaleFixed from "../utils/toLocaleFixed";
-
+import supportedCryptos from "../utils/supportedCryptos";
 const assetTypes = [
   {
     type: "Stock",
     shares: "Shares",
     ticker: "Ticker",
     tickerPlaceholder: "AAPL",
+    value: "tracked",
   },
   {
     type: "Crypto",
     shares: "Coins",
     ticker: "Ticker",
     tickerPlaceholder: "ETH",
+    value: "tracked",
   },
   {
     type: "NFT",
     shares: null,
-    ticker: "Address",
-    tickerPlaceholder: "0xd07dc4262BCDbf85190C01c996b4C06a461d2430",
+    nickname: "Nickname",
+    ticker: "Address/Token",
+    tickerPlaceholder: "0xd07...430/3423",
+    value: "tracked",
   },
   {
     type: "Real Estate",
@@ -41,7 +41,7 @@ const assetTypes = [
     tickerPlaceholder: "Meta Inc",
   },
   {
-    type: "Other",
+    type: "Other Asset",
     shares: null,
     ticker: "Name",
     tickerPlaceholder: "Jordan Rookie Card",
@@ -52,11 +52,12 @@ export default () => {
   const [basePortfolioAssets, setBasePortfolioAssets] = useRecoilState(
     basePortfolioAssetsState
   );
+
+  const [sortedBy, setSortedBy] = useRecoilState(sortedByState);
+
   const [open, setOpen] = useState(false);
-  const [inputs, setInputs] = useState({
-    type: "Stock",
-    shares: 1,
-  });
+  const [openRemove, setOpenRemove] = useState(null);
+  const [inputs, setInputs] = useState({ type: "Crypto" });
 
   const handleChange = (e) =>
     setInputs((prevState) => ({
@@ -71,20 +72,81 @@ export default () => {
     const chosenType = assetTypes.find((a) => a.type === inputs.type);
 
     // if (!inputs.account) error = "Please include account name.";
-    if (!inputs.type || !chosenType) error = "Please include asset type.";
-    if (!inputs.ticker) error = "Please include asset " + chosenType.ticker;
-    if (chosenType.shares && !inputs.shares)
+
+    if (!inputs.type || !chosenType) error = "Please choose asset type.";
+    else if (!inputs.ticker)
+      error = `Please include ${inputs.type} ${chosenType.ticker}`;
+    else if (chosenType.shares && !inputs.shares)
       error = "Please include asset " + chosenType.shares;
-    if (chosenType.shares && inputs.shares <= 0)
+    else if (chosenType.shares && inputs.shares <= 0)
       error = `Positive value for ${chosenType.shares}, please`;
+    else if (chosenType.nickname && !inputs.nickname)
+      error = `Choose a ${chosenType.nickname}, please`;
+    else if (chosenType.value !== "tracked" && !inputs.value)
+      error = `Place a value on your ${chosenType.type}, please`;
+    let foundCrypto = {};
+    if (inputs.type === "Crypto") {
+      foundCrypto = supportedCryptos.find(
+        (x) => x.symbol.toLowerCase() === inputs.ticker.toLowerCase()
+      );
+      if (!foundCrypto) error = `Cannot find ${inputs.ticker}.`;
+    }
     if (error !== "") return toast.error(error);
 
-    // console.log(inputs);
-
     //add to portfolio
+    setBasePortfolioAssets([
+      {
+        account: "Default Account",
+        type: inputs.type,
+        ticker: foundCrypto.id || inputs.ticker,
+        shares: inputs.shares || 1,
+        nickname: inputs.nickname,
+        value: Number(inputs.value),
+        show: true,
+      },
+      ...basePortfolioAssets,
+    ]);
 
     //reset inputs
-    // setInputs({});
+    setInputs({});
+    setOpen(false);
+    return toast.success(`Added ${inputs.ticker}!`);
+  };
+
+  const sortBy = (sortType) => {
+    const newSort = JSON.parse(JSON.stringify(basePortfolioAssets));
+    switch (sortType) {
+      case "Value":
+        sortedBy === "asc"
+          ? newSort.sort((a, b) => b.value - a.value)
+          : newSort.sort((a, b) => a.value - b.value);
+        break;
+      case "Ticker":
+        sortedBy === "asc"
+          ? newSort.sort((a, b) => a.ticker.localeCompare(b.ticker))
+          : newSort.sort((a, b) => b.ticker.localeCompare(a.ticker));
+        break;
+      case "Shares":
+        sortedBy === "asc"
+          ? newSort.sort((a, b) => b.shares - a.shares)
+          : newSort.sort((a, b) => a.shares - b.shares);
+        break;
+      case "ROI":
+        sortedBy === "asc"
+          ? newSort.sort((a, b) => b.roi - a.roi)
+          : newSort.sort((a, b) => a.roi - b.roi);
+        break;
+      case "Type":
+        sortedBy === "asc"
+        ? newSort.sort((a, b) => a.type.localeCompare(b.type))
+        : newSort.sort((a, b) => b.type.localeCompare(a.type));
+        break;
+
+      default:
+        return;
+    }
+    setSortedBy(sortedBy === "asc" ? "desc" : "asc");
+    setBasePortfolioAssets(newSort);
   };
 
   return (
@@ -93,60 +155,83 @@ export default () => {
       <div className="row">
         <div className="item">
           {/* <p>Add/Remove assets from portfolio</p> */}
-          <p>
-            <button className="green-button" onClick={() => setOpen(true)}>
-              Add Asset
-            </button>
-          </p>
+          {basePortfolioAssets.length < 20 ? (
+            <p>
+              <button className="green-button" onClick={() => setOpen(true)}>
+                Add Asset
+              </button>
+            </p>
+          ) : (
+            <p>You can only track up to 20 assets (for now...)</p>
+          )}
         </div>
         <div className="item"></div>
       </div>
       <div className="row">
         <div className="item">
-          <div className="table-wrapper">
-            <table style={{ width: "100%" }}>
-              <thead style={{ textAlign: "left" }}>
-                <tr>
-                  <th>Account</th>
-                  <th>Name</th>
-                  <th>Type</th>
-                  <th>Quantity</th>
-
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {basePortfolioAssets.map((asset, i) => {
-                  return (
-                    <tr key={i}>
-                      <td>{asset.account}</td>
-                      <td>{asset.ticker}</td>
-                      <td>{asset.type}</td>
-                      <td>{toLocaleFixed(asset.shares, 3)}</td>
-                      <td>
-                        <button
-                          className="red-button"
-                          onClick={() => {
-                            setBasePortfolioAssets(
-                              basePortfolioAssets.filter(
-                                (x) => x.ticker !== asset.ticker
-                              )
-                            );
-                          }}
-                        >
-                          ✖
-                        </button>{" "}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          {basePortfolioAssets.length > 0 && (
+            <div
+              className="table-wrapper"
+              style={{ maxHeight: "100%", overflow: "auto" }}
+            >
+              <table style={{ width: "100%" }}>
+                <thead style={{ textAlign: "left" }}>
+                  <tr>
+                    {/* <th>Account</th> */}
+                    <th>Asset</th>
+                    <th onClick={() => sortBy("Type")}>Type</th>
+                    <th onClick={() => sortBy("Shares")}>Quantity</th>
+                    <th onClick={() => sortBy("Value")}>Value</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {basePortfolioAssets.map((asset, i) => {
+                    return (
+                      <tr key={i}>
+                        {/* <td>{asset.account}</td> */}
+                        <td>{asset.nickname || asset.ticker}</td>
+                        <td>{asset.type}</td>
+                        <td>{toLocaleFixed(asset.shares, 3)}</td>
+                        <td>${toLocaleFixed(asset.value)}</td>
+                        <td>
+                          <button
+                            className="red-button"
+                            onClick={() => {
+                              setOpenRemove(asset);
+                            }}
+                          >
+                            ✖
+                          </button>{" "}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>
+                      <b>
+                        $
+                        {toLocaleFixed(
+                          basePortfolioAssets.reduce(
+                            (a, b) => a + (b.value || 0),
+                            0
+                          )
+                        )}
+                      </b>
+                    </td>
+                    <td></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
       <Modal
-        open={!open}
+        open={open}
         onClose={() => setOpen(false)}
         center
         closeOnEsc={false}
@@ -171,6 +256,7 @@ export default () => {
             <div>
               Asset Type
               <select name="type" onChange={handleChange} value={inputs.type}>
+                <option value={null}></option>
                 {assetTypes.map((a) => (
                   <option key={a.type} value={a.type}>
                     {a.type}
@@ -179,41 +265,57 @@ export default () => {
               </select>
             </div>
             {assetTypes.map((a) => {
-              if (a.type !== inputs.type) return;
-              if (!a.ticker) return;
-              console.log(a);
+              if (a.type !== inputs.type) return null;
+              if (!a.ticker) return null;
+
               return (
-                <div>
+                <div key={a.ticker}>
                   {a.ticker}
-                  <input
-                    name="ticker"
-                    value={inputs.ticker || ""}
-                    onChange={handleChange}
-                    placeholder={a.tickerPlaceholder}
-                  />
+                  <span style={{ display: "flex" }}>
+                    <input
+                      name="ticker"
+                      value={inputs.ticker || ""}
+                      onChange={handleChange}
+                      placeholder={a.tickerPlaceholder}
+                      autoComplete="off"
+                    />
+                    {/* <button className="search">🔍</button> */}
+                  </span>
                 </div>
               );
             })}
             {assetTypes.map((a) => {
-              if (a.type !== inputs.type) return;
+              if (a.type !== inputs.type) return null;
+              if (a.nickname)
+                return (
+                  <div key={a.ticker}>
+                    Nickname
+                    <input
+                      name="nickname"
+                      value={inputs.nickname || ""}
+                      onChange={handleChange}
+                    />
+                  </div>
+                );
               if (!a.shares)
                 return (
-                  <div>
+                  <div key={a.ticker}>
                     Value
                     <input
                       name="value"
-                      value={inputs.value}
+                      value={inputs.value || 1}
                       onChange={handleChange}
                       type="number"
                     />
                   </div>
                 );
+
               return (
-                <div>
+                <div key={a.ticker}>
                   {a.shares}
                   <input
                     name="shares"
-                    value={inputs.shares}
+                    value={inputs.shares || 1}
                     onChange={handleChange}
                     type="number"
                   />
@@ -230,6 +332,39 @@ export default () => {
           </button>
         </div>
       </Modal>
+      {openRemove !== null && (
+        <Modal
+          open={openRemove}
+          onClose={() => setOpenRemove(null)}
+          center
+          // closeOnEsc={false}
+          // closeOnOverlayClick={false}
+          classNames={{
+            // overlay: 'customOverlay',
+            modal: "customModal",
+          }}
+        >
+          <div>
+            <h2>Remove {openRemove.nickname || openRemove.ticker}?</h2>
+            <div className="add-asset-form">
+              <button
+                style={{ marginTop: 20, width: "100%" }}
+                className="red-button"
+                onClick={() => {
+                  setBasePortfolioAssets(
+                    basePortfolioAssets.filter(
+                      (x) => x.ticker !== openRemove.ticker
+                    )
+                  );
+                  setOpenRemove(null);
+                }}
+              >
+                Yes, remove this asset!
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </>
   );
 };

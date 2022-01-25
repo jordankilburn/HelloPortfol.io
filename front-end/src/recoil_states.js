@@ -1,13 +1,12 @@
 import { atom } from "recoil";
+import { recoilPersist } from "recoil-persist";
 
-export const showWhatState = atom({
-  key: "showWhatState", // unique ID (with respect to other atoms/selectors)
-  default: [], // default value (aka initial value)
-});
+const { persistAtom } = recoilPersist();
 
 export const historicalAssetsState = atom({
   key: "historicalAssetsState", // unique ID (with respect to other atoms/selectors)
   default: {}, // default value (aka initial value)
+  effects_UNSTABLE: [persistAtom],
 });
 
 export const normalizedAssetsState = atom({
@@ -31,6 +30,7 @@ export const combineAllState = atom({
 export const netWorthState = atom({
   key: "netWorthState", // unique ID (with respect to other atoms/selectors)
   default: [],
+  effects_UNSTABLE: [persistAtom],
 });
 
 export const sortedByState = atom({
@@ -42,9 +42,10 @@ export const basePortfolioAssetsState = atom({
   key: "basePortfolioAssetsState", // unique ID (with respect to other atoms/selectors)
   default: [
     // {
-    //   ticker: "AAPL",
-    //   shares: 90.2334,
-    //   type: "Stock",
+    //   ticker: "0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d/3370",
+    //   shares: 1,
+    //   nickname: "Bored Ape 3370",
+    //   type: "NFT",
     //   account: "Merril",
     // },
     // {
@@ -54,10 +55,11 @@ export const basePortfolioAssetsState = atom({
     //   account: "Merril",
     // },
     // {
-    //   ticker: "AMZN",
-    //   shares: 6,
-    //   type: "Stock",
-    //   account: "Merril",
+    //   ticker: "17911 Shadow Oak Dr.",
+    //   shares: 1,
+    //   type: "Real Estate",
+    //   account: "Homepoint",
+    //   value: 420000,
     // },
     // {
     //   ticker: "ATVI",
@@ -249,7 +251,8 @@ export const basePortfolioAssetsState = atom({
     //   account: "Coinbase",
     //   type: "Crypto",
     //   ticker: "bitcoin",
-    //   shares: 1,
+    //   shares: 1.234,
     // },
   ],
+  effects_UNSTABLE: [persistAtom],
 });

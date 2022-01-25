@@ -216,50 +216,6 @@ body {
   text-align: center;
 }
 
-.field {
-  pointer-events: auto;
-  font: inherit;
-  vertical-align: baseline;
-  border: 1px solid #ccc;
-  -webkit-appearance: none;
-  background: #fafafa;
-  box-sizing: border-box;
-  margin: 10px 0px 10px 0px;
-  overflow: hidden;
-  text-transform: none;
-  line-height: 1.5;
-  box-shadow: inherit;
-  outline: 0;
-  letter-spacing: 0px;
-  text-align: left;
-  color: #666;
-  background-color: #fff;
-  border-style: solid;
-  border-width: 1px 1px 1px 1px;
-  border-radius: 1px 1px 1px 1px;
-  border-color: #bbb;
-  padding: 0px 10px 0px 10px;
-  height: 40px;
-  width: 150px;
-}
-
-.input-dollar {
-  position: relative;
-}
-.input-dollar.left input {
-  padding-left: 18px;
-}
-
-.input-dollar:before {
-  position: absolute;
-  top: 0;
-  content: "$";
-}
-.input-dollar.left:before {
-  top: -3px;
-  left: 7px;
-}
-
 .table-wrapper {
   width: 100%;
   max-height: 350px;
@@ -350,7 +306,7 @@ body {
 }
 
 input,
-select {
+select, .search {
   text-align: center;
   width: 100%;
   -webkit-text-size-adjust: 100%;
@@ -367,7 +323,6 @@ select {
   border-color: rgb(226, 232, 240);
   padding: 0.5rem 0.75rem;
   line-height: 1.25rem;
-  padding-left: 1rem;
   font-weight: 500;
   color: rgb(57, 67, 80);
   cursor: pointer;
@@ -423,7 +378,11 @@ button:hover {
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 10px;
   grid-auto-rows: minmax(50px, auto);
-  input, select {
+  input, select, .search {
+    margin:0px;
     margin-top: 10px;
+  }
+  .search{
+    width: 40px;
   }
 }

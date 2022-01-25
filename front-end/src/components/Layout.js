@@ -20,7 +20,7 @@ function Layout({ functions }) {
 
   return (
     <div className={`app ${toggled ? "toggled" : ""}`}>
-      <ToastContainer limit={1} position="top-center" />
+      <ToastContainer limit={2} position="top-center" />
       <Aside toggled={toggled} handleToggleSidebar={handleToggleSidebar} />
       <main>
         <Topbar handleToggleSidebar={handleToggleSidebar} />

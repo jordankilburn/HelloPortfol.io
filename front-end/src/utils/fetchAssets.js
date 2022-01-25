@@ -2,22 +2,28 @@ import axios from "axios";
 
 const baseStockAPI =
   process.env.NODE_ENV === "development"
-    ? "http://localhost:5000/"
-    : "https://portfolio-tracker-express.herokuapp.com/";
+    ? "http://localhost:5000"
+    : "https://portfolio-tracker-express.herokuapp.com";
 const baseCrypyoAPI = "https://api.coingecko.com/api/v3/coins";
-
+const baseNFT = "https://nft-balance-api.dappradar.com/transactions/ethereum";
 export default async ({ basePortfolioAssets, startDate, endDate }) => {
   return new Promise(async function (resolve, reject) {
     let tickers = [];
     let cryptos = [];
+    let nfts = [];
+    let untracked = [];
 
     basePortfolioAssets.forEach((asset) => {
       if (asset.type == "Stock") tickers.push(asset.ticker);
-      if (asset.type == "Crypto") cryptos.push(asset.ticker);
+      else if (asset.type == "Crypto") cryptos.push(asset.ticker);
+      else if (asset.type == "NFT") nfts.push(asset.ticker);
+      else untracked.push(asset);
     });
 
     const date1 = new Date(startDate);
     const date2 = new Date(endDate);
+    const date1ts = startDate.getTime();
+    const date2ts = endDate.getTime();
 
     const diffDays = Math.ceil(Math.abs(date2 - date1) / (1000 * 60 * 60 * 24));
     //determine spacing on days
@@ -27,8 +33,9 @@ export default async ({ basePortfolioAssets, startDate, endDate }) => {
 
     const fetchStocks = () => {
       return new Promise(async function (resolve, reject) {
+        if (tickers.length < 1) return resolve({});
         const res = await axios
-          .post(baseStockAPI + "historical/", {
+          .post(baseStockAPI + "/historical/", {
             tickers,
             startDate,
             endDate,
@@ -67,16 +74,89 @@ export default async ({ basePortfolioAssets, startDate, endDate }) => {
                 });
               }
             }
-            reply[coin] = pricesFormatted;
+            reply[coin] = pricesFormatted.reverse();
           } else reject("Coin data not found for " + coin);
+        }
+
+        resolve(fillAllDays({ stocks: reply, startDate, endDate }));
+      });
+    };
+
+    const fetchNFTs = () => {
+      return new Promise(async function (resolve, reject) {
+        let reply = {};
+        for (let i = 0; i < nfts.length; i++) {
+          const nft = nfts[i];
+          const res = await axios
+            .get(`${baseNFT}/${nft}`, {
+              params: {
+                page: 1,
+                resultsPerPage: 100,
+                fiat: "USD",
+              },
+            })
+            .catch((e) => {
+              return reject(e);
+            });
+          if (res.data && res.data.data) {
+            let pricesFormatted = [];
+            let allSales = [];
+            for (let j = 0; j < res.data.data.length; j++) {
+              const saleInfo = res.data.data[j];
+              if (saleInfo.type === "sale") {
+                const saleDate = new Date(saleInfo.date);
+                allSales.push({
+                  date: new Date(saleDate).toISOString().slice(0, 10),
+                  close: saleInfo.priceUsd,
+                });
+                if (
+                  saleDate.getTime() <= date2ts &&
+                  saleDate.getTime() >= date1ts
+                ) {
+                  pricesFormatted.push({
+                    date: new Date(saleDate).toISOString().slice(0, 10),
+                    close: saleInfo.priceUsd,
+                  });
+                }
+              }
+            }
+            if (allSales.length > 0)
+              pricesFormatted.push({
+                date: new Date(endDate).toISOString().slice(0, 10),
+                close: allSales[0].close,
+              });
+            reply[nft] = pricesFormatted;
+          } else reply[nft] = [];
         }
         resolve(fillAllDays({ stocks: reply, startDate, endDate }));
       });
     };
 
-    try {
-      const combined = { ...(await fetchStocks()), ...(await fetchCrypto()) };
+    const fetchUntracked = () => {
+      return new Promise(async function (resolve, reject) {
+        let reply = {};
+        for (let i = 0; i < untracked.length; i++) {
+          const asset = untracked[i];
+          reply[asset.ticker] = [
+            {
+              date: new Date(startDate).toISOString().slice(0, 10),
+              close: asset.value,
+            },
+          ];
+        }
+        
+        return resolve(fillAllDays({ stocks: reply, startDate, endDate }));
+      });
+    };
 
+    try {
+      const combined = {
+        ...(await fetchStocks()),
+        ...(await fetchCrypto()),
+        ...(await fetchNFTs()),
+        ...(await fetchUntracked()),
+      };
+      
       let reply = {};
       if (period !== "d") {
         Object.keys(combined).map((ticker, i) => {
@@ -124,14 +204,22 @@ export const fillAllDays = ({ stocks, startDate, endDate }) => {
     let res = [];
 
     for (let i = 0, j = 0; i < listOfDays.length; i++) {
-      if (!a[j]) continue;
-      let thisDate = new Date(a[j].date).toISOString().slice(0, 10)
-      let close =
-        listOfDays[i] === thisDate
-          ? a[j++].close
-          : null;
-      if (close == null) {
-        close = a[j - 1] ? a[j - 1].close : a[j + 1] ? a[j + 1].close : null;
+      let close;
+      if (a[j]) {
+        let thisDate = new Date(a[j].date).toISOString().slice(0, 10);
+        close = listOfDays[i] === thisDate ? a[j++].close : null;
+
+        if (close == null) {
+          close = a[j]
+            ? a[j].close
+            : a[j - 1]
+            ? a[j - 1].close
+            : a[j + 1]
+            ? a[j + 1].close
+            : null;
+        }
+      } else {
+        close = res[i - 1] ? res[i - 1].close : null;
       }
       res[i] = {
         date: listOfDays[i],
