@@ -151,7 +151,7 @@ export default ({ historicalAssets, flatpickr, loading }) => {
   const [netWorth, setNetWorth] = useRecoilState(netWorthState);
   const [sortedBy, setSortedBy] = useRecoilState(sortedByState);
   useEffect(() => {
-    console.log(historicalAssets);
+    
     if (historicalAssets != null) {
       
       let newNetworth = [];

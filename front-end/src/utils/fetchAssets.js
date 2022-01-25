@@ -1,11 +1,11 @@
 import axios from "axios";
 
-const baseStockAPI =
+const baseAPI =
   process.env.NODE_ENV === "development"
     ? "http://localhost:5000"
     : "https://portfolio-tracker-express.herokuapp.com";
 const baseCrypyoAPI = "https://api.coingecko.com/api/v3/coins";
-const baseNFT = "https://nft-balance-api.dappradar.com/transactions/ethereum";
+
 export default async ({ basePortfolioAssets, startDate, endDate }) => {
   return new Promise(async function (resolve, reject) {
     let tickers = [];
@@ -35,7 +35,7 @@ export default async ({ basePortfolioAssets, startDate, endDate }) => {
       return new Promise(async function (resolve, reject) {
         if (tickers.length < 1) return resolve({});
         const res = await axios
-          .post(baseStockAPI + "/historical/", {
+          .post(baseAPI + "/stocks/", {
             tickers,
             startDate,
             endDate,
@@ -84,51 +84,17 @@ export default async ({ basePortfolioAssets, startDate, endDate }) => {
 
     const fetchNFTs = () => {
       return new Promise(async function (resolve, reject) {
-        let reply = {};
-        for (let i = 0; i < nfts.length; i++) {
-          const nft = nfts[i];
-          const res = await axios
-            .get(`${baseNFT}/${nft}`, {
-              params: {
-                page: 1,
-                resultsPerPage: 100,
-                fiat: "USD",
-              },
-            })
-            .catch((e) => {
-              return reject(e);
-            });
-          if (res.data && res.data.data) {
-            let pricesFormatted = [];
-            let allSales = [];
-            for (let j = 0; j < res.data.data.length; j++) {
-              const saleInfo = res.data.data[j];
-              if (saleInfo.type === "sale") {
-                const saleDate = new Date(saleInfo.date);
-                allSales.push({
-                  date: new Date(saleDate).toISOString().slice(0, 10),
-                  close: saleInfo.priceUsd,
-                });
-                if (
-                  saleDate.getTime() <= date2ts &&
-                  saleDate.getTime() >= date1ts
-                ) {
-                  pricesFormatted.push({
-                    date: new Date(saleDate).toISOString().slice(0, 10),
-                    close: saleInfo.priceUsd,
-                  });
-                }
-              }
-            }
-            if (allSales.length > 0)
-              pricesFormatted.push({
-                date: new Date(endDate).toISOString().slice(0, 10),
-                close: allSales[0].close,
-              });
-            reply[nft] = pricesFormatted;
-          } else reply[nft] = [];
-        }
-        resolve(fillAllDays({ stocks: reply, startDate, endDate }));
+        const res = await axios
+          .post(`${baseAPI}/nfts`, {
+            nfts,
+            startDate,
+            endDate,
+          })
+          .catch((e) => {
+            return reject(e);
+          });
+
+        resolve(fillAllDays({ stocks: res.data, startDate, endDate }));
       });
     };
 
@@ -144,7 +110,7 @@ export default async ({ basePortfolioAssets, startDate, endDate }) => {
             },
           ];
         }
-        
+
         return resolve(fillAllDays({ stocks: reply, startDate, endDate }));
       });
     };
@@ -156,7 +122,7 @@ export default async ({ basePortfolioAssets, startDate, endDate }) => {
         ...(await fetchNFTs()),
         ...(await fetchUntracked()),
       };
-      
+
       let reply = {};
       if (period !== "d") {
         Object.keys(combined).map((ticker, i) => {
