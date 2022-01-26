@@ -75,22 +75,22 @@ export default () => {
         }}
       />
       <br />
-      <button
+      {/* <button
         disabled={loading}
         onClick={() => {
           setDates([new Date(Date.now() - 30 * 86400000), new Date()]);
         }}
       >
         Past 30 Days
-      </button>
-      <button
+      </button> */}
+      {/* <button
         disabled={loading}
         onClick={() => {
           setDates([new Date(Date.now() - 90 * 86400000), new Date()]);
         }}
       >
         Past 90 Days
-      </button>
+      </button> */}
       <button
         disabled={loading}
         onClick={() => {

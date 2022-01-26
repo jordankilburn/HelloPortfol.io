@@ -22,8 +22,6 @@ export default async ({ basePortfolioAssets, startDate, endDate }) => {
 
     const date1 = new Date(startDate);
     const date2 = new Date(endDate);
-    const date1ts = startDate.getTime();
-    const date2ts = endDate.getTime();
 
     const diffDays = Math.ceil(Math.abs(date2 - date1) / (1000 * 60 * 60 * 24));
     //determine spacing on days
@@ -110,7 +108,6 @@ export default async ({ basePortfolioAssets, startDate, endDate }) => {
             },
           ];
         }
-
         return resolve(fillAllDays({ stocks: reply, startDate, endDate }));
       });
     };
@@ -122,7 +119,6 @@ export default async ({ basePortfolioAssets, startDate, endDate }) => {
         ...(await fetchNFTs()),
         ...(await fetchUntracked()),
       };
-
       let reply = {};
       if (period !== "d") {
         Object.keys(combined).map((ticker, i) => {

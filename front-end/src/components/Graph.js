@@ -151,9 +151,7 @@ export default ({ historicalAssets, flatpickr, loading }) => {
   const [netWorth, setNetWorth] = useRecoilState(netWorthState);
   const [sortedBy, setSortedBy] = useRecoilState(sortedByState);
   useEffect(() => {
-    
     if (historicalAssets != null) {
-      
       let newNetworth = [];
       let newNormalizedAssets = {};
       for (let i = 0; i < basePortfolioAssets.length; i++) {
@@ -255,321 +253,308 @@ export default ({ historicalAssets, flatpickr, loading }) => {
   };
 
   return (
-    <div className="dash">
-      <div className="row">
-        <div className="item inputs">
-          <div className="container">
-            <div className="row">
-              <div className="item">
-                <h3>Choose Date Range</h3>
-                {flatpickr}
+    <div className="row">
+      <div className="item inputs">
+        <h3>Choose Date Range</h3>
+        {flatpickr}
 
-                <>
-                  <h3>
-                    Total Net Worth | $
-                    {toLocaleFixed(
-                      basePortfolioAssets.reduce(
-                        (a, b) => a + (b.value || 0),
-                        0
-                      )
-                    )}
-                  </h3>
-                </>
+        <>
+          <h3>
+            Total Net Worth | $
+            {toLocaleFixed(
+              basePortfolioAssets.reduce((a, b) => a + (b.value || 0), 0)
+            )}
+          </h3>
+        </>
 
-                <h3>Portfolio</h3>
-                <div className="table-wrapper">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>
-                          <label className="check-container">
-                            Asset
-                            <input
-                              name={"combine-all"}
-                              type="checkbox"
-                              checked={
-                                basePortfolioAssets.findIndex(
-                                  (x) => x.show === false
-                                ) === -1
-                              }
-                              onChange={(e) => {
-                                let newShow = [];
-                                basePortfolioAssets.forEach((fund, i) => {
-                                  newShow[i] = {
-                                    ...fund,
-                                    show: e.target.checked,
-                                  };
-                                });
-                                setBasePortfolioAssets(newShow);
-                              }}
-                            />
-                            <span
-                              className="checkmark"
-                              style={{ backgroundColor: "#000" }}
-                            ></span>
-                          </label>
-                        </th>
-                        <th onClick={() => sortBy("Shares")}>Shares</th>
-                        <th onClick={() => sortBy("Value")}>Value</th>
-                        {/* <th onClick={() => sortBy("ROI")}>ROI</th> */}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {basePortfolioAssets.map((fund, i) => {
-                        return (
-                          <tr key={i}>
-                            <td>
-                              <label className="check-container">
-                                {fund.nickname ? fund.nickname : fund.ticker}
-                                <input
-                                  name={fund}
-                                  type="checkbox"
-                                  checked={fund.show}
-                                  onChange={() => {
-                                    let newShow = [];
-                                    basePortfolioAssets.forEach((x, j) => {
-                                      newShow[j] =
-                                        i === j
-                                          ? {
-                                              ...x,
-                                              show: !fund.show,
-                                            }
-                                          : x;
-                                    });
-                                    setBasePortfolioAssets(newShow);
-                                  }}
-                                />
-                                <span
-                                  className="checkmark"
-                                  style={{
-                                    backgroundColor:
-                                      i > fundColors.length - 1
-                                        ? fundColors[fundColors.length - 1]
-                                        : fundColors[i],
-                                  }}
-                                ></span>
-                              </label>
-                            </td>
-                            <td>{toLocaleFixed(fund.shares, 1)}</td>
-                            <td> ${toLocaleFixed(fund.value)}</td>
-                            {/* <td> {toLocaleFixed(fund.roi)}%</td> */}
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="item">
-          <h3>{combineAll ? "Net Worth" : "Compare Assets"} Graph</h3>
+        <h3>Portfolio</h3>
+        <div className="table-wrapper">
           <table>
+            <thead>
+              <tr>
+                <th>
+                  <label className="check-container">
+                    Asset
+                    <input
+                      name={"combine-all"}
+                      type="checkbox"
+                      checked={
+                        basePortfolioAssets.findIndex(
+                          (x) => x.show === false
+                        ) === -1
+                      }
+                      onChange={(e) => {
+                        let newShow = [];
+                        basePortfolioAssets.forEach((fund, i) => {
+                          newShow[i] = {
+                            ...fund,
+                            show: e.target.checked,
+                          };
+                        });
+                        setBasePortfolioAssets(newShow);
+                      }}
+                    />
+                    <span
+                      className="checkmark"
+                      style={{ backgroundColor: "#000" }}
+                    ></span>
+                  </label>
+                </th>
+                <th onClick={() => sortBy("Shares")}>Shares</th>
+                <th onClick={() => sortBy("Value")}>Value</th>
+                {/* <th onClick={() => sortBy("ROI")}>ROI</th> */}
+              </tr>
+            </thead>
             <tbody>
-              <tr>
-                <td>
-                  <label className="check-container">
-                    Show Net Worth
-                    <input
-                      name={"combine-all"}
-                      type="checkbox"
-                      checked={combineAll}
-                      onChange={() => {
-                        setCombineAll(!combineAll);
-                      }}
-                    />
-                    <span
-                      className="checkmark"
-                      style={{ backgroundColor: fundColors[0] }}
-                    ></span>
-                  </label>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <label className="check-container">
-                    Show Comparison
-                    <input
-                      name={"combine-all"}
-                      type="checkbox"
-                      checked={!combineAll}
-                      onChange={() => {
-                        setCombineAll(!combineAll);
-                      }}
-                    />
-                    <span
-                      className="checkmark"
-                      style={{ backgroundColor: fundColors[0] }}
-                    ></span>
-                  </label>
-                </td>
-              </tr>
+              {basePortfolioAssets.map((fund, i) => {
+                return (
+                  <tr key={i}>
+                    <td>
+                      <label className="check-container">
+                        {fund.nickname ? fund.nickname : fund.ticker}
+                        <input
+                          name={fund}
+                          type="checkbox"
+                          checked={fund.show}
+                          onChange={() => {
+                            let newShow = [];
+                            basePortfolioAssets.forEach((x, j) => {
+                              newShow[j] =
+                                i === j
+                                  ? {
+                                      ...x,
+                                      show: !fund.show,
+                                    }
+                                  : x;
+                            });
+                            setBasePortfolioAssets(newShow);
+                          }}
+                        />
+                        <span
+                          className="checkmark"
+                          style={{
+                            backgroundColor:
+                              i > fundColors.length - 1
+                                ? fundColors[fundColors.length - 1]
+                                : fundColors[i],
+                          }}
+                        ></span>
+                      </label>
+                    </td>
+                    <td>{toLocaleFixed(fund.shares, 0)}</td>
+                    <td> ${toLocaleFixed(fund.value)}</td>
+                    {/* <td> {toLocaleFixed(fund.roi)}%</td> */}
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
-          <ParentSize style={{ paddingLeft: 0, paddingRight: 0 }}>
-            {(parent) => {
-              return (
-                <XYChart
-                  parentWidth={parent.width}
-                  parentHeight={parent.height}
-                  parentTop={parent.top}
-                  parentLeft={parent.left}
-                  height={350}
-                  xScale={{
-                    type: "time",
-                  }}
-                  yScale={{ type: "linear" }}
-                  theme={buildChartTheme({
-                    backgroundColor: "#F1F5F9",
-                    gridColor: "#336d88",
-                    svgLabelBig: { fill: "#1d1b38" },
-                    tickLength: 8,
-                  })}
-                >
-                  <CustomBG />
-                  {combineAll && (
-                    <LinearGradient from="#4F86C6" to="#4FB0C6" id="gradient" />
-                  )}
-                  <AnimatedAxis
-                    orientation="bottom"
-                    numTicks={5}
-                    tickFormat={(val) =>
-                      new Date(val).toISOString().slice(0, 10)
-                    }
-                  />
-                  <AnimatedAxis
-                    labelOffset={2}
-                    orientation="left"
-                    tickFormat={(val) =>
-                      combineAll ? `$${numbFormat(val)}` : `${numbFormat(val)}%`
-                    }
-                  />
-
-                  {combineAll ? (
-                    <AnimatedAreaSeries
-                      fill="url('#gradient')"
-                      dataKey={"Net Worth"}
-                      // curve={curveCardinal}
-                      data={netWorth || []}
-                      xAccessor={(d) => new Date(d.date)}
-                      yAccessor={(d) => d.close}
-                      fillOpacity={0.4}
-                      lineProps={{
-                        stroke: fundColors[0],
-                      }}
-                    />
-                  ) : (
-                    basePortfolioAssets.map((fund, i) => {
-                      if (fund && fund.show)
-                        return (
-                          <AnimatedAreaSeries
-                            key={i}
-                            // curve={curveCardinal}
-                            fill="url('#gradient')"
-                            dataKey={fund.ticker}
-                            data={findNormalizedData(fund.ticker) || []}
-                            xAccessor={(d) => d && new Date(d.date)}
-                            yAccessor={(d) => d.close}
-                            fillOpacity={0.4}
-                            lineProps={{
-                              stroke:
-                                i > fundColors.length - 1
-                                  ? fundColors[fundColors.length - 1]
-                                  : fundColors[i],
-                            }}
-                          />
-                        );
-                    })
-                  )}
-
-                  <Tooltip
-                    showDatumGlyph
-                    // snapTooltipToDatumX
-                    // snapTooltipToDatumY
-                    showVerticalCrosshair
-                    showHorizontalCrosshair
-                    // showSeriesGlyphs
-                    renderTooltip={({ tooltipData, colorScale }) => {
-                      const date = new Date(
-                        accessors.xAccessor(tooltipData.nearestDatum.datum)
-                      )
-                        .toISOString()
-                        .slice(0, 10);
-                      return (
-                        <div style={{ fontFamily: "Roboto" }}>
-                          <span>{date}</span>
-                          {combineAll && (
-                            <div
-                              style={{
-                                color: fundColors[0],
-                                textDecoration: "underline",
-                                fontWeight: 700,
-                              }}
-                            >
-                              Net Worth: $
-                              {toLocaleFixed(
-                                accessors.yAccessor(
-                                  tooltipData?.nearestDatum?.datum
-                                )
-                              )}
-                            </div>
-                          )}
-                          {basePortfolioAssets.map((fund, i) => {
-                            if (
-                              tooltipData?.nearestDatum?.key !== fund.ticker ||
-                              !fund.show
-                            )
-                              return;
-
-                            const value = accessors.yAccessor(
-                              tooltipData.datumByKey[fund.ticker].datum
-                            );
-                            return (
-                              <div key={i}>
-                                <span
-                                  style={{
-                                    color:
-                                      i > fundColors.length - 1
-                                        ? fundColors[fundColors.length - 1]
-                                        : fundColors[i],
-                                    textDecoration:
-                                      tooltipData?.nearestDatum?.key ===
-                                      fund.ticker
-                                        ? "underline"
-                                        : undefined,
-                                    fontWeight:
-                                      tooltipData?.nearestDatum?.key ===
-                                      fund.ticker
-                                        ? 700
-                                        : undefined,
-                                  }}
-                                >
-                                  {fund.nickname || fund.ticker}:{" "}
-                                  {toLocaleFixed(value)}% ROI
-                                </span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      );
+        </div>
+      </div>
+      <div className="item">
+        <h3>{combineAll ? "Net Worth" : "Compare Assets"} Graph</h3>
+        <table>
+          <tbody>
+            <tr>
+              <td>
+                <label className="check-container">
+                  Show Net Worth
+                  <input
+                    name={"combine-all"}
+                    type="checkbox"
+                    checked={combineAll}
+                    onChange={() => {
+                      setCombineAll(!combineAll);
                     }}
                   />
-                </XYChart>
-              );
-            }}
-          </ParentSize>
-          <ParentSize style={{ paddingLeft: 0, paddingRight: 0 }}>
-            {(parent) => (
-              <Pie
-                parent={parent}
-                basePortfolioAssets={basePortfolioAssets}
-                fundColors={fundColors}
-                netWorth={netWorth}
-              />
-            )}
-          </ParentSize>
-        </div>
+                  <span
+                    className="checkmark"
+                    style={{ backgroundColor: fundColors[0] }}
+                  ></span>
+                </label>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label className="check-container">
+                  Show Comparison
+                  <input
+                    name={"combine-all"}
+                    type="checkbox"
+                    checked={!combineAll}
+                    onChange={() => {
+                      setCombineAll(!combineAll);
+                    }}
+                  />
+                  <span
+                    className="checkmark"
+                    style={{ backgroundColor: fundColors[0] }}
+                  ></span>
+                </label>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <ParentSize style={{ paddingLeft: 0, paddingRight: 0 }}>
+          {(parent) => {
+            return (
+              <XYChart
+                parentWidth={parent.width}
+                parentHeight={parent.height}
+                parentTop={parent.top}
+                parentLeft={parent.left}
+                height={350}
+                xScale={{
+                  type: "time",
+                }}
+                yScale={{ type: "linear" }}
+                theme={buildChartTheme({
+                  backgroundColor: "#F1F5F9",
+                  gridColor: "#336d88",
+                  svgLabelBig: { fill: "#1d1b38" },
+                  tickLength: 8,
+                })}
+              >
+                <CustomBG />
+                {combineAll && (
+                  <LinearGradient from="#4F86C6" to="#4FB0C6" id="gradient" />
+                )}
+                <AnimatedAxis
+                  orientation="bottom"
+                  numTicks={5}
+                  tickFormat={(val) => new Date(val).toISOString().slice(0, 10)}
+                />
+                <AnimatedAxis
+                  labelOffset={2}
+                  orientation="left"
+                  tickFormat={(val) =>
+                    combineAll ? `$${numbFormat(val)}` : `${numbFormat(val)}%`
+                  }
+                />
+
+                {combineAll ? (
+                  <AnimatedAreaSeries
+                    fill="url('#gradient')"
+                    dataKey={"Net Worth"}
+                    // curve={curveCardinal}
+                    data={netWorth || []}
+                    xAccessor={(d) => new Date(d.date)}
+                    yAccessor={(d) => d.close}
+                    fillOpacity={0.4}
+                    lineProps={{
+                      stroke: fundColors[0],
+                    }}
+                  />
+                ) : (
+                  basePortfolioAssets.map((fund, i) => {
+                    if (fund && fund.show)
+                      return (
+                        <AnimatedAreaSeries
+                          key={i}
+                          // curve={curveCardinal}
+                          fill="url('#gradient')"
+                          dataKey={fund.ticker}
+                          data={findNormalizedData(fund.ticker) || []}
+                          xAccessor={(d) => d && new Date(d.date)}
+                          yAccessor={(d) => d.close}
+                          fillOpacity={0.4}
+                          lineProps={{
+                            stroke:
+                              i > fundColors.length - 1
+                                ? fundColors[fundColors.length - 1]
+                                : fundColors[i],
+                          }}
+                        />
+                      );
+                  })
+                )}
+
+                <Tooltip
+                  showDatumGlyph
+                  // snapTooltipToDatumX
+                  // snapTooltipToDatumY
+                  showVerticalCrosshair
+                  showHorizontalCrosshair
+                  // showSeriesGlyphs
+                  renderTooltip={({ tooltipData, colorScale }) => {
+                    const date = new Date(
+                      accessors.xAccessor(tooltipData.nearestDatum.datum)
+                    )
+                      .toISOString()
+                      .slice(0, 10);
+                    return (
+                      <div style={{ fontFamily: "Roboto" }}>
+                        <span>{date}</span>
+                        {combineAll && (
+                          <div
+                            style={{
+                              color: fundColors[0],
+                              textDecoration: "underline",
+                              fontWeight: 700,
+                            }}
+                          >
+                            Net Worth: $
+                            {toLocaleFixed(
+                              accessors.yAccessor(
+                                tooltipData?.nearestDatum?.datum
+                              )
+                            )}
+                          </div>
+                        )}
+                        {basePortfolioAssets.map((fund, i) => {
+                          if (
+                            tooltipData?.nearestDatum?.key !== fund.ticker ||
+                            !fund.show
+                          )
+                            return;
+
+                          const value = accessors.yAccessor(
+                            tooltipData.datumByKey[fund.ticker].datum
+                          );
+                          return (
+                            <div key={i}>
+                              <span
+                                style={{
+                                  color:
+                                    i > fundColors.length - 1
+                                      ? fundColors[fundColors.length - 1]
+                                      : fundColors[i],
+                                  textDecoration:
+                                    tooltipData?.nearestDatum?.key ===
+                                    fund.ticker
+                                      ? "underline"
+                                      : undefined,
+                                  fontWeight:
+                                    tooltipData?.nearestDatum?.key ===
+                                    fund.ticker
+                                      ? 700
+                                      : undefined,
+                                }}
+                              >
+                                {fund.nickname || fund.ticker}:{" "}
+                                {toLocaleFixed(value)}% ROI
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  }}
+                />
+              </XYChart>
+            );
+          }}
+        </ParentSize>
+        <ParentSize style={{ paddingLeft: 0, paddingRight: 0 }}>
+          {(parent) => (
+            <Pie
+              parent={parent}
+              basePortfolioAssets={basePortfolioAssets}
+              fundColors={fundColors}
+              netWorth={netWorth}
+            />
+          )}
+        </ParentSize>
       </div>
     </div>
   );

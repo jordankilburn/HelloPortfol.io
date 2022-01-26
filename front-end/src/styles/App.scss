@@ -145,7 +145,7 @@ body {
     }
   }
 
-  @media (max-width: 767.98px) {
+  @media (max-width: $breakpoint-md) {
     overflow-x: hidden;
     header {
       h1 {
@@ -186,30 +186,31 @@ body {
 }
 
 .row {
+  width:100%;
   display: flex;
   flex-flow: row wrap;
   justify-content: flex-start;
 }
 
 .item {
-  flex-basis: 100%;
+  width: 50%;
   -ms-flex: auto;
   flex: auto;
-  width: 259px;
   position: relative;
   box-sizing: border-box;
   overflow-x: visible;
-}
+  padding: 10px;
+  min-width: 350px;
 
-@media (min-width: 815px) {
-  .item {
-    flex-basis: 50%;
+  @media (max-width: $breakpoint-md) {
+    flex-basis: 100%;
+    padding: 0px;
   }
 }
 
 .inputs {
-  flex-basis: 35%;
-  margin-right: 20px;
+  width: 20%;
+  
 }
 
 .center {
@@ -222,10 +223,22 @@ body {
   overflow-y: scroll;
   background-color: $main-bg-color;
   table {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     width: 100%;
+    border-collapse: collapse;
   }
   thead {
     text-align: left;
+  }
+  tr:nth-child(2n + 2) {
+    td {
+      background-color: darken($main-bg-color, 4%);
+    }
+  }
+  tr:last-child {
+    td {
+      background-color: darken($main-bg-color, 10%);
+    }
   }
   th {
     cursor: pointer;
@@ -306,7 +319,8 @@ body {
 }
 
 input,
-select, .search {
+select,
+.search {
   text-align: center;
   width: 100%;
   -webkit-text-size-adjust: 100%;
@@ -361,13 +375,20 @@ button {
   margin: 0px;
 }
 
+.x-button {
+  background-color: $sidebar-bg-color;
+  margin: 0px;
+  padding: 5px;
+  line-height: 1rem;
+}
+
 button:hover {
   filter: brightness(95%);
   /* opacity: 0.85; */
 }
 
 .customModal {
-  width:80%;
+  width: 80%;
 }
 
 .add-asset-form {
@@ -378,11 +399,20 @@ button:hover {
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 10px;
   grid-auto-rows: minmax(50px, auto);
-  input, select, .search {
-    margin:0px;
+  input,
+  select,
+  .search {
+    margin: 0px;
     margin-top: 10px;
   }
-  .search{
+  .search {
     width: 40px;
   }
+}
+
+.green {
+  color: $main-green;
+}
+.red {
+  color: $main-red;
 }
