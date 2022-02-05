@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { useRecoilState, useRecoilValue } from "recoil";
+import { useRecoilState } from "recoil";
 import { Modal } from "react-responsive-modal";
 import { toast } from "react-toastify";
 import { basePortfolioAssetsState, sortedByState } from "../recoil_states";
 import toLocaleFixed from "../utils/toLocaleFixed";
 import supportedCryptos from "../utils/supportedCryptos";
+import DownloadUpload from "../components/DownloadUpload";
+
 const assetTypes = [
   {
     type: "Stock",
@@ -46,9 +48,15 @@ const assetTypes = [
     ticker: "Name",
     tickerPlaceholder: "Jordan Rookie Card",
   },
+  {
+    type: "Liability",
+    shares: null,
+    ticker: "Name",
+    tickerPlaceholder: "Home Loan",
+  },
 ];
 
-export default () => {
+export default function Manage() {
   const [basePortfolioAssets, setBasePortfolioAssets] = useRecoilState(
     basePortfolioAssetsState
   );
@@ -56,7 +64,6 @@ export default () => {
   const [sortedBy, setSortedBy] = useRecoilState(sortedByState);
 
   const [open, setOpen] = useState(false);
-  const [openLiability, setOpenLiability] = useState(false);
   const [openRemove, setOpenRemove] = useState(null);
   const [inputs, setInputs] = useState({ type: "Crypto" });
 
@@ -66,35 +73,6 @@ export default () => {
       [e.target.name]: e.target.value,
     }));
 
-  const handleAddLiability = () => {
-    let error = "";
-    toast.clearWaitingQueue();
-    toast.dismiss();
-
-    if (!inputs.nickname) error = `Type a liability name, please.`;
-    else if (!inputs.value || inputs.value <= 0)
-      error = `Please include a positive value.`;
-    if (error !== "") return toast.error(error);
-
-    //add to portfolio
-    setBasePortfolioAssets([
-      {
-        account: "Default Account",
-        type: "Liability",
-        ticker: inputs.nickname,
-        shares: 1,
-        nickname: inputs.nickname,
-        value: -1 * Number(inputs.value),
-        show: true,
-      },
-      ...basePortfolioAssets,
-    ]);
-
-    //reset inputs
-    setInputs({});
-    setOpenLiability(false);
-    return toast.success(`Added ${inputs.nickname}!`);
-  };
   const handleAddAsset = () => {
     let error = "";
     toast.clearWaitingQueue();
@@ -132,7 +110,7 @@ export default () => {
         ticker: foundCrypto.id || inputs.ticker,
         shares: inputs.shares || 1,
         nickname: inputs.nickname,
-        value: Number(inputs.value),
+        value:Number(inputs.value),
         show: true,
       },
       ...basePortfolioAssets,
@@ -182,22 +160,26 @@ export default () => {
 
   return (
     <>
-      <div className="row">
-        <div className="item">
-          <h2>Manage Assets</h2>
+      <div className='row'>
+        <div className='item'>
+          <h2>Manage Assets/Liabilities</h2>
           {/* <p>Add/Remove assets from portfolio</p> */}
           {basePortfolioAssets.length < 20 ? (
             <p>
-              <button className="green-button" onClick={() => setOpen(true)}>
+              <button className='green-button' onClick={() => setOpen(true)}>
                 Add Asset
               </button>
+              <DownloadUpload
+                assetTypes={assetTypes}
+                basePortfolioAssets={basePortfolioAssets}
+              />
             </p>
           ) : (
             <p>You can only track up to 20 items (for now...)</p>
           )}
           {basePortfolioAssets.length > 0 && (
             <div
-              className="table-wrapper"
+              className='table-wrapper'
               style={{ maxHeight: "100%", overflow: "auto" }}
             >
               <table style={{ width: "100%" }}>
@@ -205,127 +187,49 @@ export default () => {
                   <tr>
                     <th></th>
                     {/* <th>Account</th> */}
-                    <th>Asset</th>
+                    <th>Item</th>
                     <th onClick={() => sortBy("Type")}>Type</th>
                     <th onClick={() => sortBy("Shares")}>QTY</th>
                     <th onClick={() => sortBy("Value")}>Value</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {basePortfolioAssets
-                    .filter((x) => x.type !== "Liability")
-                    .map((asset, i) => {
-                      return (
-                        <tr key={i}>
-                          <td>
-                            <button
-                              className="x-button"
-                              onClick={() => {
-                                setOpenRemove(asset);
-                              }}
-                            >
-                              ✖
-                            </button>{" "}
-                          </td>
-                          {/* <td>{asset.account}</td> */}
-                          <td>{asset.nickname || asset.ticker}</td>
-                          <td>{asset.type}</td>
-                          <td>{toLocaleFixed(asset.shares, 3)}</td>
-                          <td>${toLocaleFixed(asset.value)}</td>
-                        </tr>
-                      );
-                    })}
+                  {basePortfolioAssets.map((asset, i) => {
+                    return (
+                      <tr key={i}>
+                        <td>
+                          <button
+                            className='x-button'
+                            onClick={() => {
+                              setOpenRemove(asset);
+                            }}
+                          >
+                            ✖
+                          </button>{" "}
+                        </td>
+                        {/* <td>{asset.account}</td> */}
+                        <td>{asset.nickname || asset.ticker}</td>
+                        <td>{asset.type}</td>
+                        <td>{toLocaleFixed(asset.shares)}</td>
+                        <td className={asset.value <0?"red":"green"}>${toLocaleFixed(asset.value)}</td>
+                      </tr>
+                    );
+                  })}
                   <tr>
                     <td></td>
                     <td>
                       {" "}
-                      <b className="green">Total:</b>
+                      <b className='green'>Total:</b>
                     </td>
                     <td></td> <td></td>
                     <td>
-                      <b className="green">
+                      <b className='green'>
                         $
                         {toLocaleFixed(
-                          basePortfolioAssets
-                            .filter((x) => x.type !== "Liability")
-                            .reduce((a, b) => a + (b.value || 0), 0)
-                        )}
-                      </b>
-                    </td>
-                    <td></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-        <div className="item">
-          <h2>Manage Liabilities</h2>
-          {basePortfolioAssets.length < 20 && (
-            <p>
-              <button
-                className="red-button"
-                onClick={() => setOpenLiability(true)}
-              >
-                Add Liability
-              </button>
-            </p>
-          )}
-
-          {basePortfolioAssets.filter((x) => x.type === "Liability").length >
-            0 && (
-            <div
-              className="table-wrapper"
-              style={{ maxHeight: "100%", overflow: "auto" }}
-            >
-              <table style={{ width: "100%" }}>
-                <thead style={{ textAlign: "left" }}>
-                  <tr>
-                    {/* <th>Account</th> */}
-                    <th></th>
-                    <th>Liability</th>
-                    {/* <th onClick={() => sortBy("Type")}>Type</th> */}
-                    {/* <th onClick={() => sortBy("Shares")}>QTY</th> */}
-                    <th onClick={() => sortBy("Value")}>Value</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {basePortfolioAssets
-                    .filter((x) => x.type === "Liability")
-                    .map((asset, i) => {
-                      return (
-                        <tr key={i}>
-                          <td>
-                            <button
-                              className="x-button"
-                              onClick={() => {
-                                setOpenRemove(asset);
-                              }}
-                            >
-                              ✖
-                            </button>{" "}
-                          </td>
-                          <td>{asset.nickname || asset.ticker}</td>
-                          {/* <td>{asset.type}</td> */}
-                          {/* <td>{toLocaleFixed(asset.shares, 3)}</td> */}
-                          <td>${toLocaleFixed(asset.value)}</td>
-                        </tr>
-                      );
-                    })}
-                  <tr>
-                    <td></td>
-                    <td>
-                      {" "}
-                      <b className="red">Total:</b>
-                    </td>
-                    {/* <td></td> */}
-                    <td>
-                      <b className="red">
-                        $
-                        {toLocaleFixed(
-                          basePortfolioAssets
-                            .filter((x) => x.type === "Liability")
-                            .reduce((a, b) => a + (b.value || 0), 0)
+                          basePortfolioAssets.reduce(
+                            (a, b) => a + (b.value || 0),
+                            0
+                          )
                         )}
                       </b>
                     </td>
@@ -337,7 +241,6 @@ export default () => {
           )}
         </div>
       </div>
-
       <Modal
         open={open}
         onClose={() => setOpen(false)}
@@ -351,7 +254,7 @@ export default () => {
       >
         <div>
           <h2>Add Asset</h2>
-          <div className="add-asset-form">
+          <div className='add-asset-form'>
             {/* <div>
               Account Name
               <input
@@ -363,7 +266,7 @@ export default () => {
             </div> */}
             <div>
               Asset Type
-              <select name="type" onChange={handleChange} value={inputs.type}>
+              <select name='type' onChange={handleChange} value={inputs.type}>
                 <option value={null}></option>
                 {assetTypes.map((a) => (
                   <option key={a.type} value={a.type}>
@@ -381,11 +284,11 @@ export default () => {
                   {a.ticker}
                   <span style={{ display: "flex" }}>
                     <input
-                      name="ticker"
+                      name='ticker'
                       value={inputs.ticker || ""}
                       onChange={handleChange}
                       placeholder={a.tickerPlaceholder}
-                      autoComplete="off"
+                      autoComplete='off'
                     />
                     {/* <button className="search">🔍</button> */}
                   </span>
@@ -399,7 +302,7 @@ export default () => {
                   <div key={a.ticker}>
                     Nickname
                     <input
-                      name="nickname"
+                      name='nickname'
                       value={inputs.nickname || ""}
                       onChange={handleChange}
                     />
@@ -410,10 +313,10 @@ export default () => {
                   <div key={a.ticker}>
                     Value
                     <input
-                      name="value"
+                      name='value'
                       value={inputs.value || 1}
                       onChange={handleChange}
-                      type="number"
+                      type='number'
                     />
                   </div>
                 );
@@ -422,10 +325,10 @@ export default () => {
                 <div key={a.ticker}>
                   {a.shares}
                   <input
-                    name="shares"
+                    name='shares'
                     value={inputs.shares || 1}
                     onChange={handleChange}
-                    type="number"
+                    type='number'
                   />
                 </div>
               );
@@ -433,7 +336,7 @@ export default () => {
           </div>
           <button
             style={{ marginTop: 20, width: "100%" }}
-            className="green-button"
+            className='green-button'
             onClick={handleAddAsset}
           >
             Add to Portfolio
@@ -454,10 +357,10 @@ export default () => {
         >
           <div>
             <h2>Remove {openRemove.nickname || openRemove.ticker}?</h2>
-            <div className="add-asset-form">
+            <div className='add-asset-form'>
               <button
                 style={{ marginTop: 20, width: "100%" }}
-                className="red-button"
+                className='red-button'
                 onClick={() => {
                   setBasePortfolioAssets(
                     basePortfolioAssets.filter(
@@ -474,49 +377,6 @@ export default () => {
           </div>
         </Modal>
       )}
-      {openLiability !== null && (
-        <Modal
-          open={openLiability}
-          onClose={() => setOpenLiability(null)}
-          center
-          closeOnEsc={false}
-          closeOnOverlayClick={false}
-          classNames={{
-            // overlay: 'customOverlay',
-            modal: "customModal",
-          }}
-        >
-          <div>
-            <h2>Add Liability</h2>
-            <div className="add-asset-form">
-              <div>
-                Liability Name
-                <input
-                  name="nickname"
-                  value={inputs.nickname || ""}
-                  onChange={handleChange}
-                />
-              </div>
-              <div>
-                Liability Value
-                <input
-                  name="value"
-                  value={inputs.value || 1}
-                  onChange={handleChange}
-                  type={"number"}
-                />
-              </div>
-            </div>
-            <button
-              style={{ marginTop: 20, width: "100%" }}
-              className="red-button"
-              onClick={handleAddLiability}
-            >
-              Add to Portfolio
-            </button>
-          </div>
-        </Modal>
-      )}
     </>
   );
-};
+}

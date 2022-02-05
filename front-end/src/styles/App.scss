@@ -342,13 +342,15 @@ select,
   cursor: pointer;
 }
 
-button {
+button, .file-upload {
+
   -webkit-text-size-adjust: 100%;
   tab-size: 4;
   -webkit-font-smoothing: antialiased;
   box-sizing: border-box;
   border: 0 solid;
   font-family: inherit;
+  font-size: 1rem;
   margin: 5px;
   text-transform: none;
   -webkit-appearance: button;
@@ -368,7 +370,7 @@ button {
 }
 .green-button {
   background-color: $main-green;
-  margin: 0px;
+  // margin: 0px;
 }
 .red-button {
   background-color: $main-red;
@@ -410,9 +412,12 @@ button:hover {
   }
 }
 
+
+
 .green {
   color: $main-green;
 }
 .red {
   color: $main-red;
 }
+
