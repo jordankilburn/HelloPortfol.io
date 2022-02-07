@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Modal from "../components/Modal";
 import { ExportToCsv } from "export-to-csv";
+import { toast } from "react-toastify";
 
 var exampleData = [
   {
@@ -39,8 +40,11 @@ const options = {
   useKeysAsHeaders: true,
 };
 
-export default function CsvReader({ basePortfolioAssets, assetTypes }) {
-  const [csvArray, setCsvArray] = useState([]);
+export default function CsvReader({
+  basePortfolioAssets,
+  assetTypes,
+  setBasePortfolioAssets,
+}) {
   const [open, setOpen] = useState(false);
   const csvExporter = new ExportToCsv(options);
 
@@ -58,9 +62,34 @@ export default function CsvReader({ basePortfolioAssets, assetTypes }) {
       }, {});
       return eachObject;
     });
-    console.log(newArray);
+    addAssets(newArray);
     //parse inputs and add them.
-    setCsvArray(newArray);
+  };
+
+  const addAssets = (assets) => {
+    let totalCount = basePortfolioAssets.length;
+    let newAssets = [];
+    const keys = Object.keys(assets[0]);
+    for (let i = 0; i < assets.length; i++) {
+      if (totalCount >= 20)
+        return toast.error("You can only track up to 20 items right now.");
+      const asset = assets[i];
+      const type = asset[keys[0]];
+      const chosenType = assetTypes.find((a) => type.includes(a.type));
+      if (chosenType) {
+        //if a valid type
+        newAssets.push({
+          account: "Default Account",
+          type: type,
+          ticker: asset[keys[1]],
+          shares: Number(asset[keys[2]]),
+          value: Number(asset[keys[3]]),
+          show: true,
+        });
+      }
+    }
+    setBasePortfolioAssets([...newAssets, ...basePortfolioAssets]);
+    totalCount++;
   };
 
   const submit = (file) => {
@@ -80,7 +109,7 @@ export default function CsvReader({ basePortfolioAssets, assetTypes }) {
         onClick={() =>
           csvExporter.generateCsv(
             basePortfolioAssets.map(
-              ({ show, roi, nickname, ...keepAttrs }) => keepAttrs
+              ({ account, show, roi, nickname, ...keepAttrs }) => keepAttrs
             )
           )
         }
@@ -95,24 +124,28 @@ export default function CsvReader({ basePortfolioAssets, assetTypes }) {
               You can upload all your assets/liabilities in a single file!
               <br />
               <br />
-              You need to upload a csv with 4 columns:
+              You need to upload a csv with 4 columns (order sensitive):
               <div style={{ margin: "1rem 0" }}>
-                Asset Type,
-                <br /> Ticker / Address / Name,
-                <br /> Quantity / Shares,
-                <br /> Value* (optional)
+                1. <b>Asset Type</b>: Valid Asset Types (as of now) are:
+                <br />{" "}
+                {assetTypes.map((e) => {
+                  return `"${e.type}", `;
+                })}
+                <br />
+                <br />
+                2. <b>Ticker / Address / Name</b>: This is the stock/crypto
+                ticker, the address/token for an NFT, or custom name or address
+                for everything else. This must be unique or it will overwrite
+                the existing item with the same name/ticker.
+                <br />
+                <br />
+                3. <b>Quantity / Shares</b>
+                <br />
+                <br />
+                4. <b>Value (optional)</b>: Value is not needed for assets of
+                type Stock, Crypto, or NFT as they are tracked.
               </div>
-              Valid Asset Types (as of now) are:
-              <br />{" "}
-              {assetTypes.map((e) => {
-                return `"${e.type}", `;
-              })}
               <br />
-              <br />
-              <b>
-                *Value is not needed for assets of type Stock, Crypto, or NFT as
-                they are tracked.*
-              </b>
               <br />
               <button onClick={() => csvExporter.generateCsv(exampleData)}>
                 Download an Example

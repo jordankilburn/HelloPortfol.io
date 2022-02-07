@@ -172,6 +172,7 @@ export default function Manage() {
               <DownloadUpload
                 assetTypes={assetTypes}
                 basePortfolioAssets={basePortfolioAssets}
+                setBasePortfolioAssets={setBasePortfolioAssets}
               />
             </p>
           ) : (
