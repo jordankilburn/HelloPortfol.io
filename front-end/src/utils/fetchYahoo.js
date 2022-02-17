@@ -31,7 +31,6 @@ export default (data) => {
         },
       })
       .catch((e) => reject(e));
-    console.log(response.data);
     return resolve(reply);
     // return yahooFinance
     //   .historical({

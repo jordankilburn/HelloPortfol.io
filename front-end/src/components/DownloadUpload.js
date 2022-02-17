@@ -2,12 +2,14 @@ import { useState } from "react";
 import Modal from "../components/Modal";
 import { ExportToCsv } from "export-to-csv";
 import { toast } from "react-toastify";
+import Papa from "papaparse";
+import currency from "currency.js";
 
 var exampleData = [
   {
     "Asset Type": "Real Estate",
-    "Ticker / Address / Name": "17911 Shadow Oak",
-    "Quantity / Shares": 2,
+    "Ticker / Address / Name": "My House",
+    "Quantity / Shares": 1,
     Value: 130000,
   },
   {
@@ -46,60 +48,54 @@ export default function CsvReader({
   setBasePortfolioAssets,
 }) {
   const [open, setOpen] = useState(false);
+  const [openErase, setOpenErase] = useState(false);
   const csvExporter = new ExportToCsv(options);
 
   // [{name: "", age: 0, rank: ""},{name: "", age: 0, rank: ""}]
-
-  const processCSV = (str, delim = ",") => {
-    const headers = str.slice(0, str.indexOf("\n")).split(delim);
-    const rows = str.slice(str.indexOf("\n") + 1).split("\n");
-
-    const newArray = rows.map((row) => {
-      const values = row.split(delim);
-      const eachObject = headers.reduce((obj, header, i) => {
-        obj[header] = values[i];
-        return obj;
-      }, {});
-      return eachObject;
-    });
-    addAssets(newArray);
-    //parse inputs and add them.
-  };
 
   const addAssets = (assets) => {
     let totalCount = basePortfolioAssets.length;
     let newAssets = [];
     const keys = Object.keys(assets[0]);
     for (let i = 0; i < assets.length; i++) {
-      if (totalCount >= 20)
-        return toast.error("You can only track up to 20 items right now.");
+      // if (totalCount >= 20)
+      //   return toast.error("You can only track up to 20 items right now.");
       const asset = assets[i];
       const type = asset[keys[0]];
+      if (!type) continue;
       const chosenType = assetTypes.find((a) => type.includes(a.type));
       if (chosenType) {
         //if a valid type
+        let thisValue = currency(asset[keys[3]]).value;
+        let thisTicker = asset[keys[1]];
+        if (chosenType.type === "Liability")
+          thisValue = -1 * Math.abs(thisValue);
+        if (chosenType.type === "Stock")
+          thisTicker.replace(/[^A-Za-z0-9-]/g, "");
+
         newAssets.push({
           account: "Default Account",
           type: type,
-          ticker: asset[keys[1]],
-          shares: Number(asset[keys[2]]),
-          value: Number(asset[keys[3]]),
+          ticker: thisTicker,
+          shares: currency(asset[keys[2]]),
+          value: thisValue,
           show: true,
         });
       }
+      totalCount++;
     }
     setBasePortfolioAssets([...newAssets, ...basePortfolioAssets]);
-    totalCount++;
+    setOpen(false);
   };
 
   const submit = (file) => {
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      const text = e.target.result;
-      processCSV(text);
-    };
-
-    reader.readAsText(file);
+    Papa.parse(file, {
+      header: true,
+      dynamicTyping: true,
+      complete: function (results) {
+        addAssets(results.data);
+      },
+    });
   };
 
   return (
@@ -115,6 +111,13 @@ export default function CsvReader({
         }
       >
         Download as CSV
+      </button>
+      <button
+        className="red-button"
+        style={{ marginLeft: "auto" }}
+        onClick={() => setOpenErase(true)}
+      >
+        Erase Portfolio
       </button>
       {open && (
         <Modal
@@ -143,22 +146,23 @@ export default function CsvReader({
                 <br />
                 <br />
                 4. <b>Value (optional)</b>: Value is not needed for assets of
-                type Stock, Crypto, or NFT as they are tracked.
+                type Stock, Crypto, or NFT as they are tracked. Liabilities are
+                always made negative automatically.
               </div>
               <br />
               <br />
               <button onClick={() => csvExporter.generateCsv(exampleData)}>
                 Download an Example
               </button>
-              <label htmlFor='csvFile' className='file-upload green-button'>
+              <label htmlFor="csvFile" className="file-upload green-button">
                 Choose CSV
               </label>
               <input
                 style={{ display: "none" }}
-                className='upload-button'
-                type='file'
-                accept='.csv'
-                id='csvFile'
+                className="upload-button"
+                type="file"
+                accept=".csv"
+                id="csvFile"
                 onChange={(e) => {
                   submit(e.target.files[0]);
                 }}
@@ -167,6 +171,42 @@ export default function CsvReader({
           }
           open={open}
           setOpen={setOpen}
+        />
+      )}
+      {openErase && (
+        <Modal
+          headline={"Are you sure you want to erase all your portfolio?"}
+          body={
+            <div>
+              <p>At least download it first!</p>
+              <button
+                onClick={() =>
+                  csvExporter.generateCsv(
+                    basePortfolioAssets.map(
+                      ({ account, show, roi, nickname, ...keepAttrs }) =>
+                        keepAttrs
+                    )
+                  )
+                }
+              >
+                Download as CSV
+              </button>
+              <div className="add-asset-form">
+                <button
+                  style={{ marginTop: 20, width: "100%" }}
+                  className="red-button"
+                  onClick={() => {
+                    setBasePortfolioAssets([]);
+                    setOpenErase(false);
+                  }}
+                >
+                  Do it! Erase EVERYTHING!
+                </button>
+              </div>
+            </div>
+          }
+          open={openErase}
+          setOpen={setOpenErase}
         />
       )}
     </>

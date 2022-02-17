@@ -6,6 +6,7 @@ import { basePortfolioAssetsState, sortedByState } from "../recoil_states";
 import toLocaleFixed from "../utils/toLocaleFixed";
 import supportedCryptos from "../utils/supportedCryptos";
 import DownloadUpload from "../components/DownloadUpload";
+import currency from "currency.js";
 
 const assetTypes = [
   {
@@ -100,6 +101,10 @@ export default function Manage() {
       );
       if (!foundCrypto) error = `Cannot find ${inputs.ticker}.`;
     }
+    let thisValue = currency(inputs.value).value;
+    if (chosenType.type === "Liability")
+      thisValue = -1 * Math.abs(thisValue);
+
     if (error !== "") return toast.error(error);
 
     //add to portfolio
@@ -110,7 +115,7 @@ export default function Manage() {
         ticker: foundCrypto.id || inputs.ticker,
         shares: inputs.shares || 1,
         nickname: inputs.nickname,
-        value:Number(inputs.value),
+        value: thisValue,
         show: true,
       },
       ...basePortfolioAssets,
@@ -164,8 +169,8 @@ export default function Manage() {
         <div className='item'>
           <h2>Manage Assets/Liabilities</h2>
           {/* <p>Add/Remove assets from portfolio</p> */}
-          {basePortfolioAssets.length < 20 ? (
-            <p>
+          {/* {basePortfolioAssets.length < 20 ? ( */}
+            <div  style={{width:'100%', display:'flex'}}>
               <button className='green-button' onClick={() => setOpen(true)}>
                 Add Asset
               </button>
@@ -174,10 +179,10 @@ export default function Manage() {
                 basePortfolioAssets={basePortfolioAssets}
                 setBasePortfolioAssets={setBasePortfolioAssets}
               />
-            </p>
-          ) : (
+            </div>
+          {/* ) : (
             <p>You can only track up to 20 items (for now...)</p>
-          )}
+          )} */}
           {basePortfolioAssets.length > 0 && (
             <div
               className='table-wrapper'

@@ -240,11 +240,14 @@ body {
       background-color: darken($main-bg-color, 10%);
     }
   }
+  td {
+    padding-right: 1rem;
+  }
   th {
+    padding-right: 1rem;
     cursor: pointer;
-
+    background-color: $main-bg-color;
     position: sticky;
-    padding: 0px;
     z-index: 2;
     top: -1px;
   }
@@ -374,7 +377,6 @@ button, .file-upload {
 }
 .red-button {
   background-color: $main-red;
-  margin: 0px;
 }
 
 .x-button {

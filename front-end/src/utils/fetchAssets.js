@@ -119,6 +119,7 @@ export default async ({ basePortfolioAssets, startDate, endDate }) => {
         ...(await fetchNFTs()),
         ...(await fetchUntracked()),
       };
+      
       let reply = {};
       if (period !== "d") {
         Object.keys(combined).map((ticker, i) => {
