@@ -3,6 +3,13 @@
   "version": "0.1.0",
   "homepage": "/",
   "private": true,
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "deploy": "npm run build && netlify deploy --prod"
+  },
   "dependencies": {
     "@craco/craco": "^5.9.0",
     "@testing-library/jest-dom": "^5.11.4",
@@ -32,12 +39,7 @@
     "recoil-persist": "^4.0.0",
     "web-vitals": "^1.0.1"
   },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
+
   "eslintConfig": {
     "extends": "react-app"
   },

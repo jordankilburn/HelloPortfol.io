@@ -28,7 +28,7 @@ export default () => {
     setDateRange(range);
     if (range[0] == "" || range[1] == "" || range.length !== 2) return;
     setLoading(true);
-    const id = toast.loading("Loading Portfolio...", {});
+    const id = toast.loading("Loading Portfolio.\nThis might take a while BTW...", {});
 
     try {
       const combined = await fetchAssets({
@@ -48,6 +48,7 @@ export default () => {
         closeButton: null,
       });
     } catch (error) {
+      console.log(error)
       toast.update(id, {
         render: error,
         type: "error",

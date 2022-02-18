@@ -6,7 +6,10 @@ import axios from "axios";
 
 const app = express();
 
-const whitelist = ["http://localhost:3000"]; //white list consumers
+const whitelist = [
+  "http://localhost:3000",
+  "https://track-portfolio.netlify.app",
+]; //white list consumers
 const corsOptions = {
   origin: function (origin, callback) {
     if (whitelist.indexOf(origin) !== -1) {
@@ -144,7 +147,7 @@ const getNFTs = (data) => {
           reply[nft] = pricesFormatted;
         } else reply[nft] = [];
       }
-      return resolve(reply)
+      return resolve(reply);
     } catch (error) {
       return reject(error);
     }

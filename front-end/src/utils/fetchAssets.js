@@ -40,7 +40,7 @@ export default async ({ basePortfolioAssets, startDate, endDate }) => {
             period: "d",
           })
           .catch((e) => {
-            return reject(e);
+            return reject(`Problem fetching stocks`);
           });
         if (res) {
           resolve(fillAllDays({ stocks: res.data, startDate, endDate }));
@@ -97,7 +97,7 @@ export default async ({ basePortfolioAssets, startDate, endDate }) => {
             endDate,
           })
           .catch((e) => {
-            return reject(e);
+            return reject(`Problem fetching NFTs`);
           });
 
         resolve(fillAllDays({ stocks: res.data, startDate, endDate }));
