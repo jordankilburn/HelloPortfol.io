@@ -1,4 +1,4 @@
-export default [
+const allCryptos = [
   { id: "01coin", symbol: "zoc", name: "01coin" },
   {
     id: "0-5x-long-algorand-token",
@@ -11807,7 +11807,6 @@ export default [
   { id: "samusky-token", symbol: "samu", name: "Samusky Token" },
   { id: "sandclock", symbol: "quartz", name: "Sandclock" },
   { id: "sandego", symbol: "sdgo", name: "SanDeGo" },
-  { id: "san-diego-coin", symbol: "sand", name: "San Diego Coin" },
   { id: "sandman", symbol: "sandman", name: "SandMan" },
   { id: "sanshu-inu", symbol: "sanshu", name: "Sanshu Inu" },
   { id: "sans-token", symbol: "sans", name: "Sans Token" },
@@ -13475,11 +13474,6 @@ export default [
   { id: "the-red-order", symbol: "ordr", name: "The Red Order" },
   { id: "the-rocks", symbol: "therocks", name: "The Rocks" },
   { id: "the-sandbox", symbol: "sand", name: "The Sandbox" },
-  {
-    id: "the-sandbox-wormhole",
-    symbol: "sand",
-    name: "The Sandbox (Wormhole)",
-  },
   { id: "the-seed-farm", symbol: "seed", name: "The Seed Farm" },
   { id: "thesolandao", symbol: "SDO", name: "TheSolanDAO" },
   { id: "the-spartans", symbol: "tsp", name: "The Spartans" },
@@ -13597,7 +13591,6 @@ export default [
   { id: "tokamak-network", symbol: "ton", name: "Tokamak Network" },
   { id: "tokel", symbol: "tkl", name: "Tokel" },
   { id: "tokemak", symbol: "toke", name: "Tokemak" },
-  { id: "tokemak-wormhole", symbol: "toke", name: "Tokemak (Wormhole)" },
   { id: "tokemon", symbol: "tkmn", name: "Tokemon" },
   { id: "toke-n", symbol: "toke.n", name: "TOKE.N" },
   { id: "tokenasset", symbol: "ntb", name: "TokenAsset" },
@@ -15426,3 +15419,7 @@ export default [
   { id: "zzz-finance", symbol: "zzz", name: "zzz.finance" },
   { id: "zzz-finance-v2", symbol: "zzzv2", name: "zzz.finance v2" },
 ];
+
+// const filtered = allCryptos.filter(c=>!c.id.includes("wormhole"))
+
+export default allCryptos;

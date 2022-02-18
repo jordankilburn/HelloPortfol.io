@@ -90,6 +90,7 @@ export default async ({ basePortfolioAssets, startDate, endDate }) => {
 
     const fetchNFTs = () => {
       return new Promise(async function (resolve, reject) {
+        if (nfts.length <= 0) return resolve([]);
         const res = await axios
           .post(`${baseAPI}/nfts`, {
             nfts,

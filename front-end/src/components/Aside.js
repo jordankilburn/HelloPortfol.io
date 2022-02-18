@@ -92,16 +92,16 @@ const Aside = ({ toggled, handleToggleSidebar }) => {
         </Menu> */}
       </SidebarContent>
 
-      {/* <SidebarFooter style={{ textAlign: "center" }}>
+      <SidebarFooter style={{ textAlign: "center" }}>
         <div
           className="sidebar-btn-wrapper"
           style={{
             padding: "20px 24px",
           }}
         >
-          Footer
+          v0.0.1
         </div>
-      </SidebarFooter> */}
+      </SidebarFooter>
     </ProSidebar>
   );
 };

@@ -24,9 +24,12 @@ body {
   background-color: $main-bg-color;
 }
 
+
 #root {
   height: 100%;
 }
+
+
 
 .app {
   height: 100%;
@@ -51,6 +54,22 @@ body {
     font-size: 15px;
     display: none;
   }
+  .topbar {
+    a{
+      color: $sidebar-color;
+      &:hover {
+        color: $highlight-color;
+      }
+    }
+    color: $main-bg-color;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-left: auto;
+    span {
+      padding:1rem;
+    }
+  }
 
   .sidebar-btn-wrapper {
     display: flex;
@@ -62,7 +81,7 @@ body {
       padding: 1px 15px;
       border-radius: 40px;
       background: rgba(255, 255, 255, 0.05);
-      color: #adadad;
+      color: $sidebar-color;
       text-decoration: none;
       margin: 0 auto;
       height: 35px;

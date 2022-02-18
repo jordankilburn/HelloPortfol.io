@@ -65,7 +65,7 @@ const options = {
   useTextFile: false,
   useBom: true,
   useKeysAsHeaders: true,
-  filename:'Portfilio'
+  filename: "Portfolio",
 };
 
 export default function CsvReader({
@@ -139,7 +139,7 @@ export default function CsvReader({
           )
         }
       >
-        Download as CSV
+        Download Portfolio
       </button>
       <button
         className="red-button"
@@ -168,8 +168,7 @@ export default function CsvReader({
                 <br />
                 2. <b>Ticker / Address / Name</b>: This is the stock/crypto
                 ticker, the address/token for an NFT, or custom name or address
-                for everything else. This must be unique or it will overwrite
-                the existing item with the same name/ticker.
+                for everything else.
                 <br />
                 <br />
                 3. <b>Quantity / Shares</b>
@@ -184,9 +183,7 @@ export default function CsvReader({
               </div>
               <br />
               <br />
-              <button onClick={() => csvExporter.generateCsv(exampleData)}>
-                Download an Example
-              </button>
+              
               <label htmlFor="csvFile" className="file-upload green-button">
                 Choose CSV
               </label>
@@ -200,6 +197,9 @@ export default function CsvReader({
                   submit(e.target.files[0]);
                 }}
               />
+              <button onClick={() => csvExporter.generateCsv(exampleData)}>
+                Download an Example
+              </button>
             </>
           }
           open={open}

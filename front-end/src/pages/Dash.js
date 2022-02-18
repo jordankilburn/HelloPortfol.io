@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "flatpickr/dist/themes/airbnb.css";
 import Flatpickr from "react-flatpickr";
 import Graph from "../components/Graph";
@@ -23,12 +24,17 @@ export default () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  let navigate = useNavigate();
+
   const setDates = async (range) => {
     if (range[0] == dateRange[0] && range[1] == dateRange[1]) return;
     setDateRange(range);
     if (range[0] == "" || range[1] == "" || range.length !== 2) return;
     setLoading(true);
-    const id = toast.loading("Loading Portfolio.\nThis might take a while BTW...", {});
+    const id = toast.loading(
+      "Loading Portfolio. This might take a while BTW...",
+      {}
+    );
 
     try {
       const combined = await fetchAssets({
@@ -48,7 +54,6 @@ export default () => {
         closeButton: null,
       });
     } catch (error) {
-      console.log(error)
       toast.update(id, {
         render: error,
         type: "error",
@@ -110,6 +115,16 @@ export default () => {
       </button>
     </div>
   );
+  if (basePortfolioAssets.length <= 0) navigate("/manage");
+  // return
+  // <div className="row">
+  //   <div className="item inputs">
+  //     <h3>
+  //       Add Assets in <Link to="/manage">Manage</Link>
+  //     </h3>
+  //   </div>
+  // </div>
+
   return (
     <Graph
       historicalAssets={historicalAssets}

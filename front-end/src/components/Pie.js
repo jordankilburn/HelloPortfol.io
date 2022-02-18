@@ -88,7 +88,7 @@ export default function Example({
                         fontSize={"0.75em"}
                         textAnchor="middle"
                       >
-                        {}
+                        {nickname || ticker}
                       </text>
                       <text
                         x={0}

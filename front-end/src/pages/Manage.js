@@ -66,7 +66,7 @@ export default function Manage() {
 
   const [open, setOpen] = useState(false);
   const [openRemove, setOpenRemove] = useState(null);
-  const [inputs, setInputs] = useState({ type: "Crypto" });
+  const [inputs, setInputs] = useState({ type: "Crypto", shares: 1 });
 
   const handleChange = (e) =>
     setInputs((prevState) => ({
@@ -102,8 +102,7 @@ export default function Manage() {
       if (!foundCrypto) error = `Cannot find ${inputs.ticker}.`;
     }
     let thisValue = currency(inputs.value).value;
-    if (chosenType.type === "Liability")
-      thisValue = -1 * Math.abs(thisValue);
+    if (chosenType.type === "Liability") thisValue = -1 * Math.abs(thisValue);
 
     if (error !== "") return toast.error(error);
 
@@ -165,27 +164,27 @@ export default function Manage() {
 
   return (
     <>
-      <div className='row'>
-        <div className='item'>
+      <div className="row">
+        <div className="item">
           <h2>Manage Assets/Liabilities</h2>
           {/* <p>Add/Remove assets from portfolio</p> */}
           {/* {basePortfolioAssets.length < 20 ? ( */}
-            <div  style={{width:'100%', display:'flex'}}>
-              <button className='green-button' onClick={() => setOpen(true)}>
-                Add Asset
-              </button>
-              <DownloadUpload
-                assetTypes={assetTypes}
-                basePortfolioAssets={basePortfolioAssets}
-                setBasePortfolioAssets={setBasePortfolioAssets}
-              />
-            </div>
+          <div style={{ width: "100%", display: "flex" }}>
+            <button className="green-button" onClick={() => setOpen(true)}>
+              Add Asset
+            </button>
+            <DownloadUpload
+              assetTypes={assetTypes}
+              basePortfolioAssets={basePortfolioAssets}
+              setBasePortfolioAssets={setBasePortfolioAssets}
+            />
+          </div>
           {/* ) : (
             <p>You can only track up to 20 items (for now...)</p>
           )} */}
           {basePortfolioAssets.length > 0 && (
             <div
-              className='table-wrapper'
+              className="table-wrapper"
               style={{ maxHeight: "100%", overflow: "auto" }}
             >
               <table style={{ width: "100%" }}>
@@ -205,7 +204,7 @@ export default function Manage() {
                       <tr key={i}>
                         <td>
                           <button
-                            className='x-button'
+                            className="x-button"
                             onClick={() => {
                               setOpenRemove(asset);
                             }}
@@ -217,7 +216,9 @@ export default function Manage() {
                         <td>{asset.nickname || asset.ticker}</td>
                         <td>{asset.type}</td>
                         <td>{toLocaleFixed(asset.shares)}</td>
-                        <td className={asset.value <0?"red":"green"}>${toLocaleFixed(asset.value)}</td>
+                        <td className={asset.value < 0 ? "red" : "green"}>
+                          ${toLocaleFixed(asset.value)}
+                        </td>
                       </tr>
                     );
                   })}
@@ -225,11 +226,11 @@ export default function Manage() {
                     <td></td>
                     <td>
                       {" "}
-                      <b className='green'>Total:</b>
+                      <b className="green">Total:</b>
                     </td>
-                    <td></td> <td></td>
+                    <td></td><td></td>
                     <td>
-                      <b className='green'>
+                      <b className="green">
                         $
                         {toLocaleFixed(
                           basePortfolioAssets.reduce(
@@ -260,7 +261,7 @@ export default function Manage() {
       >
         <div>
           <h2>Add Asset</h2>
-          <div className='add-asset-form'>
+          <div className="add-asset-form">
             {/* <div>
               Account Name
               <input
@@ -272,7 +273,7 @@ export default function Manage() {
             </div> */}
             <div>
               Asset Type
-              <select name='type' onChange={handleChange} value={inputs.type}>
+              <select name="type" onChange={handleChange} value={inputs.type}>
                 <option value={null}></option>
                 {assetTypes.map((a) => (
                   <option key={a.type} value={a.type}>
@@ -290,11 +291,11 @@ export default function Manage() {
                   {a.ticker}
                   <span style={{ display: "flex" }}>
                     <input
-                      name='ticker'
+                      name="ticker"
                       value={inputs.ticker || ""}
                       onChange={handleChange}
                       placeholder={a.tickerPlaceholder}
-                      autoComplete='off'
+                      autoComplete="off"
                     />
                     {/* <button className="search">🔍</button> */}
                   </span>
@@ -308,7 +309,7 @@ export default function Manage() {
                   <div key={a.ticker}>
                     Nickname
                     <input
-                      name='nickname'
+                      name="nickname"
                       value={inputs.nickname || ""}
                       onChange={handleChange}
                     />
@@ -319,10 +320,10 @@ export default function Manage() {
                   <div key={a.ticker}>
                     Value
                     <input
-                      name='value'
+                      name="value"
                       value={inputs.value || 1}
                       onChange={handleChange}
-                      type='number'
+                      type="number"
                     />
                   </div>
                 );
@@ -331,10 +332,10 @@ export default function Manage() {
                 <div key={a.ticker}>
                   {a.shares}
                   <input
-                    name='shares'
+                    name="shares"
                     value={inputs.shares || 1}
                     onChange={handleChange}
-                    type='number'
+                    type="number"
                   />
                 </div>
               );
@@ -342,7 +343,7 @@ export default function Manage() {
           </div>
           <button
             style={{ marginTop: 20, width: "100%" }}
-            className='green-button'
+            className="green-button"
             onClick={handleAddAsset}
           >
             Add to Portfolio
@@ -363,10 +364,10 @@ export default function Manage() {
         >
           <div>
             <h2>Remove {openRemove.nickname || openRemove.ticker}?</h2>
-            <div className='add-asset-form'>
+            <div className="add-asset-form">
               <button
                 style={{ marginTop: 20, width: "100%" }}
-                className='red-button'
+                className="red-button"
                 onClick={() => {
                   setBasePortfolioAssets(
                     basePortfolioAssets.filter(
