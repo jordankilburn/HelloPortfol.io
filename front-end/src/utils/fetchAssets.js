@@ -1,5 +1,5 @@
 import axios from "axios";
-
+import supportedCryptos from "./supportedCryptos";
 const baseAPI =
   process.env.NODE_ENV === "development"
     ? "http://localhost:5000"
@@ -56,9 +56,17 @@ export default async ({ basePortfolioAssets, startDate, endDate }) => {
         let reply = {};
         for (let i = 0; i < cryptos.length; i++) {
           const coin = cryptos[i];
-          const thisCoinRaw = await axios.get(
-            `${baseCrypyoAPI}/${coin}/market_chart?vs_currency=usd&days=max`
+          const coinName = supportedCryptos.find(
+            (x) => x.symbol.toLowerCase() === coin.toLowerCase()
           );
+          if (!coinName) return reject(`Cannot find ${coin}.`);
+          const thisCoinRaw = await axios
+            .get(
+              `${baseCrypyoAPI}/${coinName.id}/market_chart?vs_currency=usd&days=max`
+            )
+            .catch((e) => {
+              return reject(`Problem finding ${coin}`);
+            });
           if (thisCoinRaw.data && thisCoinRaw.data.prices) {
             const prices = thisCoinRaw.data.prices;
             let pricesFormatted = [];
@@ -119,7 +127,7 @@ export default async ({ basePortfolioAssets, startDate, endDate }) => {
         ...(await fetchNFTs()),
         ...(await fetchUntracked()),
       };
-      
+
       let reply = {};
       if (period !== "d") {
         Object.keys(combined).map((ticker, i) => {

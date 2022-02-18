@@ -49,14 +49,16 @@ export default function Example({
         >
           {(pie) => {
             return pie.arcs.map((arc, i) => {
-              const { ticker, value, nickname } = arc.data;
+              const { ticker, value, nickname, color } = arc.data;
               const [centroidX, centroidY] = pie.path.centroid(arc);
               const hasSpaceForLabel = arc.endAngle - arc.startAngle >= 0.4;
               const arcPath = pie.path(arc);
-              const arcFill =
-                i > fundColors.length - 1
-                  ? fundColors[fundColors.length - 1]
-                  : fundColors[i];
+              const arcFill = color;
+              let displayName = nickname || ticker;
+              displayName =
+                displayName.length > 8
+                  ? displayName.slice(0, 8) + "..."
+                  : displayName;
               return (
                 <g
                   key={i}
@@ -73,7 +75,7 @@ export default function Example({
                       fontSize={"0.75rem"}
                       textAnchor="middle"
                     >
-                      {nickname || ticker}
+                      {displayName}
                     </text>
                   )}
                   {active && active.ticker == ticker && (
@@ -86,7 +88,7 @@ export default function Example({
                         fontSize={"0.75em"}
                         textAnchor="middle"
                       >
-                        {nickname || ticker}
+                        {}
                       </text>
                       <text
                         x={0}

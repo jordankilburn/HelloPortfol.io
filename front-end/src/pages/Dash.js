@@ -49,13 +49,13 @@ export default () => {
       });
     } catch (error) {
       toast.update(id, {
-        render: "Unable to load :(",
+        render: error,
         type: "error",
         isLoading: false,
         autoClose: null,
         closeButton: null,
       });
-      setError("Unable to load :(");
+      setError(error);
     }
   };
 

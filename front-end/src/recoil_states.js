@@ -20,6 +20,7 @@ export const dateRangeState = atom({
     new Date(Date.now() - 30 * 86400000), //past 30 days
     Date.now(),
   ],
+  effects_UNSTABLE: [persistAtom],
 });
 
 export const combineAllState = atom({

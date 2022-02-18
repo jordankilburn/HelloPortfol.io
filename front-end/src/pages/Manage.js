@@ -112,7 +112,7 @@ export default function Manage() {
       {
         account: "Default Account",
         type: inputs.type,
-        ticker: foundCrypto.id || inputs.ticker,
+        ticker: inputs.ticker,
         shares: inputs.shares || 1,
         nickname: inputs.nickname,
         value: thisValue,

@@ -29,20 +29,13 @@ const accessors = {
 
 const fundColors = [
   "#4F86C6",
-  // "#65524D",
-  // "#7F6A93",
-  // "#23A455",
-  // "#5b64c6",
-  // "#F87575",
-  // "#4fc67f",
-  // "#378b59",
   "#1CE6FF",
   "#FF34FF",
   "#FF4A46",
   "#008941",
   "#006FA6",
   "#A30059",
-  "#FFDBE5",
+  // "#FFDBE5",
   "#7A4900",
   "#0000A6",
   "#63FFAC",
@@ -52,7 +45,7 @@ const fundColors = [
   "#997D87",
   "#5A0007",
   "#809693",
-  "#FEFFE6",
+  // "#FEFFE6",
   "#1B4400",
   "#4FC601",
   "#3B5DFF",
@@ -66,7 +59,6 @@ const fundColors = [
   "#FF90C9",
   "#B903AA",
   "#D16100",
-  "#DDEFFF",
   "#000035",
   "#7B4F4B",
   "#A1C299",
@@ -76,7 +68,6 @@ const fundColors = [
   "#00846F",
   "#372101",
   "#FFB500",
-  "#C2FFED",
   "#A079BF",
   "#CC0744",
   "#C0B9B2",
@@ -195,6 +186,10 @@ export default ({ historicalAssets, flatpickr, loading }) => {
         newBFA[i].show = basePortfolioAssets[i]
           ? basePortfolioAssets[i].show
           : true;
+        newBFA[i].color =
+          i > fundColors.length - 1
+            ? fundColors[fundColors.length - 1]
+            : fundColors[i];
       }
 
       if (historicalAssets != null) {
@@ -333,10 +328,7 @@ export default ({ historicalAssets, flatpickr, loading }) => {
                         <span
                           className="checkmark"
                           style={{
-                            backgroundColor:
-                              i > fundColors.length - 1
-                                ? fundColors[fundColors.length - 1]
-                                : fundColors[i],
+                            backgroundColor: fund.color,
                           }}
                         ></span>
                       </label>
@@ -459,10 +451,7 @@ export default ({ historicalAssets, flatpickr, loading }) => {
                           yAccessor={(d) => d.close}
                           fillOpacity={0.4}
                           lineProps={{
-                            stroke:
-                              i > fundColors.length - 1
-                                ? fundColors[fundColors.length - 1]
-                                : fundColors[i],
+                            stroke: fund.color,
                           }}
                         />
                       );
@@ -515,10 +504,7 @@ export default ({ historicalAssets, flatpickr, loading }) => {
                             <div key={i}>
                               <span
                                 style={{
-                                  color:
-                                    i > fundColors.length - 1
-                                      ? fundColors[fundColors.length - 1]
-                                      : fundColors[i],
+                                  color: fund.color,
                                   textDecoration:
                                     tooltipData?.nearestDatum?.key ===
                                     fund.ticker

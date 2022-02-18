@@ -1,34 +1,59 @@
 import { useState } from "react";
 import Modal from "../components/Modal";
 import { ExportToCsv } from "export-to-csv";
-import { toast } from "react-toastify";
 import Papa from "papaparse";
 import currency from "currency.js";
 
 var exampleData = [
   {
-    "Asset Type": "Real Estate",
-    "Ticker / Address / Name": "My House",
+    "Asset Type": "NFT",
+    "Ticker / Address / Name":
+      "0xf87e31492faf9a91b02ee0deaad50d51d56d5d4d/115792089237316195423570985008687907845103207859538040916336593429550692564966",
     "Quantity / Shares": 1,
-    Value: 130000,
+    Value: "",
+    Nickname: "Decentraland: Parcel -25,-26",
+  },
+  {
+    "Asset Type": "Real Estate",
+    "Ticker / Address / Name": "A Californian Shack",
+    "Quantity / Shares": 1,
+    Value: 450000,
+    Nickname: "",
   },
   {
     "Asset Type": "Crypto",
     "Ticker / Address / Name": "BTC",
-    "Quantity / Shares": 2,
-    Value: "Autotracked.",
+    "Quantity / Shares": 3.24,
+    Value: "",
+    Nickname: "",
+  },
+  {
+    "Asset Type": "Stock",
+    "Ticker / Address / Name": "TSLA",
+    "Quantity / Shares": 10,
+    Value: "",
+    Nickname: "",
   },
   {
     "Asset Type": "Liability",
     "Ticker / Address / Name": "Home Loan",
     "Quantity / Shares": 1,
-    Value: 100000,
+    Value: -100000,
+    Nickname: "",
   },
   {
     "Asset Type": "Crypto",
     "Ticker / Address / Name": "ETH",
     "Quantity / Shares": 2,
-    Value: "Autotracked.",
+    Value: "",
+    Nickname: "",
+  },
+  {
+    "Asset Type": "Private Business",
+    "Ticker / Address / Name": "Quality Meat LLC",
+    "Quantity / Shares": 1,
+    Value: 150000,
+    Nickname: "",
   },
 ];
 
@@ -40,6 +65,7 @@ const options = {
   useTextFile: false,
   useBom: true,
   useKeysAsHeaders: true,
+  filename:'Portfilio'
 };
 
 export default function CsvReader({
@@ -61,30 +87,33 @@ export default function CsvReader({
       // if (totalCount >= 20)
       //   return toast.error("You can only track up to 20 items right now.");
       const asset = assets[i];
-      const type = asset[keys[0]];
+      const type = asset["Asset Type"];
       if (!type) continue;
       const chosenType = assetTypes.find((a) => type.includes(a.type));
       if (chosenType) {
         //if a valid type
-        let thisValue = currency(asset[keys[3]]).value;
-        let thisTicker = asset[keys[1]];
+        let thisValue = currency(asset["Value"]).value;
+        let thisTicker = asset["Ticker / Address / Name"];
         if (chosenType.type === "Liability")
           thisValue = -1 * Math.abs(thisValue);
         if (chosenType.type === "Stock")
           thisTicker.replace(/[^A-Za-z0-9-]/g, "");
 
         newAssets.push({
-          account: "Default Account",
-          type: type,
-          ticker: thisTicker,
-          shares: currency(asset[keys[2]]),
-          value: thisValue,
-          show: true,
+          ...{
+            account: "Default Account",
+            type: type,
+            ticker: thisTicker,
+            shares: currency(asset["Quantity / Shares"]),
+            value: thisValue,
+            show: true,
+          },
+          ...(asset["Nickname"] && { nickname: asset["Nickname"] }),
         });
       }
       totalCount++;
     }
-    setBasePortfolioAssets([...newAssets, ...basePortfolioAssets]);
+    setBasePortfolioAssets([...basePortfolioAssets, ...newAssets]);
     setOpen(false);
   };
 
@@ -127,7 +156,8 @@ export default function CsvReader({
               You can upload all your assets/liabilities in a single file!
               <br />
               <br />
-              You need to upload a csv with 4 columns (order sensitive):
+              You need to upload a csv with 5 columns (Exact header must be
+              used):
               <div style={{ margin: "1rem 0" }}>
                 1. <b>Asset Type</b>: Valid Asset Types (as of now) are:
                 <br />{" "}
@@ -148,6 +178,9 @@ export default function CsvReader({
                 4. <b>Value (optional)</b>: Value is not needed for assets of
                 type Stock, Crypto, or NFT as they are tracked. Liabilities are
                 always made negative automatically.
+                <br />
+                <br />
+                5. <b>Nickname (optional)</b>: Only used for NFTs.
               </div>
               <br />
               <br />
