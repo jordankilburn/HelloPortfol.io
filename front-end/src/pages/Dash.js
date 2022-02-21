@@ -26,6 +26,15 @@ export default () => {
 
   let navigate = useNavigate();
 
+  useEffect(() => {
+    if (
+      basePortfolioAssets.length > 0 &&
+      Object.keys(historicalAssets).length <= 0
+    ) {
+      setDates([new Date(Date.now() - 365 * 5 * 86400000), new Date()]);
+    }
+  }, []);
+
   const setDates = async (range) => {
     if (range[0] == dateRange[0] && range[1] == dateRange[1]) return;
     setDateRange(range);
@@ -69,7 +78,7 @@ export default () => {
     <div style={{ margin: "0.5rem 0", textAlign: "center" }}>
       <Flatpickr
         disabled={loading}
-        style={{ margin: 5 }}
+        style={{ margin: "5px 0" }}
         options={{
           mode: "range",
           dateFormat: "Y-m-d",

@@ -7,6 +7,8 @@ import {
   buildChartTheme,
   // AreaStack,
 } from "@visx/xychart";
+import { Line } from "@visx/shape";
+import { Group } from "@visx/group";
 import { ParentSize } from "@visx/responsive";
 import { LinearGradient } from "@visx/gradient";
 import CustomBG from "./CustomChartBackground";
@@ -21,6 +23,7 @@ import {
   combineAllState,
   sortedByState,
 } from "../recoil_states";
+import currency from "currency.js";
 
 const accessors = {
   xAccessor: (d) => new Date(d.date),
@@ -333,7 +336,7 @@ export default ({ historicalAssets, flatpickr, loading }) => {
                         ></span>
                       </label>
                     </td>
-                    <td>{toLocaleFixed(fund.shares, 0)}</td>
+                    <td>{currency(fund.shares).value}</td>
                     <td> ${toLocaleFixed(fund.value)}</td>
                     {/* <td> {toLocaleFixed(fund.roi)}%</td> */}
                   </tr>
@@ -413,9 +416,54 @@ export default ({ historicalAssets, flatpickr, loading }) => {
                 )}
                 <AnimatedAxis
                   orientation="bottom"
-                  numTicks={5}
+                  numTicks={7}
                   tickFormat={(val) => new Date(val).toISOString().slice(0, 10)}
-                />
+                >
+                  {(props) => {
+                    const tickLabelSize = 11;
+                    const tickRotate = 20;
+                    const tickColor = "#336d88"
+                    const fontColor = "#495057"
+                    const axisCenter =
+                      (props.axisToPoint.x - props.axisFromPoint.x) / 2;
+                    return (
+                      <g className="my-custom-bottom-axis">
+                        {props.ticks.map((tick, i) => {
+                          const tickX = tick.to.x;
+                          const tickY =
+                            tick.to.y + tickLabelSize + props.tickLength;
+                          return (
+                            <Group
+                              key={`vx-tick-${tick.value}-${i}`}
+                              className={"vx-axis-tick"}
+                            >
+                              <Line
+                                from={tick.from}
+                                to={tick.to}
+                                stroke={tickColor}
+                              />
+                              <text
+                                transform={`translate(${tickX}, ${tickY}) rotate(${tickRotate})`}
+                                fontSize={tickLabelSize}
+                                textAnchor="middle"
+                                fill={fontColor}
+                              >
+                                {tick.formattedValue}
+                              </text>
+                            </Group>
+                          );
+                        })}
+                        <text
+                          textAnchor="middle"
+                          transform={`translate(${axisCenter}, 50)`}
+                          fontSize="8"
+                        >
+                          {props.label}
+                        </text>
+                      </g>
+                    );
+                  }}
+                </AnimatedAxis>
                 <AnimatedAxis
                   labelOffset={2}
                   orientation="left"
@@ -459,7 +507,7 @@ export default ({ historicalAssets, flatpickr, loading }) => {
                 )}
 
                 <Tooltip
-                  showDatumGlyph
+                  // showDatumGlyph
                   // snapTooltipToDatumX
                   // snapTooltipToDatumY
                   showVerticalCrosshair

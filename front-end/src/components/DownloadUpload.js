@@ -3,59 +3,7 @@ import Modal from "../components/Modal";
 import { ExportToCsv } from "export-to-csv";
 import Papa from "papaparse";
 import currency from "currency.js";
-
-var exampleData = [
-  {
-    "Asset Type": "NFT",
-    "Ticker / Address / Name":
-      "0xf87e31492faf9a91b02ee0deaad50d51d56d5d4d/115792089237316195423570985008687907845103207859538040916336593429550692564966",
-    "Quantity / Shares": 1,
-    Value: "",
-    Nickname: "Decentraland: Parcel -25,-26",
-  },
-  {
-    "Asset Type": "Real Estate",
-    "Ticker / Address / Name": "A Californian Shack",
-    "Quantity / Shares": 1,
-    Value: 450000,
-    Nickname: "",
-  },
-  {
-    "Asset Type": "Crypto",
-    "Ticker / Address / Name": "BTC",
-    "Quantity / Shares": 3.24,
-    Value: "",
-    Nickname: "",
-  },
-  {
-    "Asset Type": "Stock",
-    "Ticker / Address / Name": "TSLA",
-    "Quantity / Shares": 10,
-    Value: "",
-    Nickname: "",
-  },
-  {
-    "Asset Type": "Liability",
-    "Ticker / Address / Name": "Home Loan",
-    "Quantity / Shares": 1,
-    Value: -100000,
-    Nickname: "",
-  },
-  {
-    "Asset Type": "Crypto",
-    "Ticker / Address / Name": "ETH",
-    "Quantity / Shares": 2,
-    Value: "",
-    Nickname: "",
-  },
-  {
-    "Asset Type": "Private Business",
-    "Ticker / Address / Name": "Quality Meat LLC",
-    "Quantity / Shares": 1,
-    Value: 150000,
-    Nickname: "",
-  },
-];
+import { exampleData } from "../utils/examplePortfolios";
 
 const options = {
   fieldSeparator: ",",

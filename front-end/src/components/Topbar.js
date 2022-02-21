@@ -11,7 +11,7 @@ export default ({ handleToggleSidebar }) => {
       </div>
       <div className="topbar">
         <span>
-          Add assets in <Link to="/manage">Manage</Link> then select a date range
+          Add/Remove assets in <Link to="/manage">Manage</Link> then select a date range
           in <Link to="/">Dashboard</Link>.
         </span>
       </div>
