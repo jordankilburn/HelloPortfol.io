@@ -75,20 +75,24 @@ export default function CsvReader({
     });
   };
 
+  const downloadCSV = () => {
+    csvExporter.generateCsv(
+      basePortfolioAssets.map(({ ticker, shares, nickname, type, value }) => {
+        return {
+          "Asset Type": "NFT",
+          "Ticker / Address / Name": ticker,
+          "Quantity / Shares": shares,
+          Value: value ? value : "",
+          Nickname: nickname ? nickname : "",
+        };
+      })
+    );
+  };
+
   return (
     <>
       <button onClick={() => setOpen(true)}>Upload CSV</button>
-      <button
-        onClick={() =>
-          csvExporter.generateCsv(
-            basePortfolioAssets.map(
-              ({ account, show, roi, nickname, ...keepAttrs }) => keepAttrs
-            )
-          )
-        }
-      >
-        Download Portfolio
-      </button>
+      <button onClick={downloadCSV}>Download Portfolio</button>
       <button
         className="red-button"
         style={{ marginLeft: "auto" }}
@@ -131,7 +135,6 @@ export default function CsvReader({
               </div>
               <br />
               <br />
-              
               <label htmlFor="csvFile" className="file-upload green-button">
                 Choose CSV
               </label>
@@ -160,18 +163,7 @@ export default function CsvReader({
           body={
             <div>
               <p>At least download it first!</p>
-              <button
-                onClick={() =>
-                  csvExporter.generateCsv(
-                    basePortfolioAssets.map(
-                      ({ account, show, roi, nickname, ...keepAttrs }) =>
-                        keepAttrs
-                    )
-                  )
-                }
-              >
-                Download as CSV
-              </button>
+              <button onClick={downloadCSV}>Download as CSV</button>
               <div className="add-asset-form">
                 <button
                   style={{ marginTop: 20, width: "100%" }}
