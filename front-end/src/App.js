@@ -4,7 +4,7 @@ import { RecoilRoot } from "recoil";
 import "./styles/App.scss";
 
 
-import Layout from "./components/Layout";
+import Layout from "./Layout";
 
 
 

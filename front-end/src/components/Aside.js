@@ -45,7 +45,7 @@ const Aside = ({ toggled, handleToggleSidebar }) => {
             whiteSpace: "nowrap",
           }}
         >
-          Hi There
+          Hello Portfol.io
         </div>
       </SidebarHeader>
       <SidebarContent>
@@ -58,6 +58,10 @@ const Aside = ({ toggled, handleToggleSidebar }) => {
             Manage
             <Link to="/manage" />
           </MenuItem>
+          {/* <MenuItem icon={<FaTachometerAlt />}>
+            Retirement Calculator (soon..)
+            <Link to="/retirement-calculator" />
+          </MenuItem> */}
         </Menu>
         {/* <Menu iconShape="circle">
           <SubMenu

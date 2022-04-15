@@ -3,13 +3,14 @@ import { Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import Topbar from "./Topbar";
-import Aside from "./Aside";
+import Topbar from "./components/Topbar";
+import Aside from "./components/Aside";
 
-import Dash from "../pages/Dash";
-import Manage from "../pages/Manage";
+import Dash from "./pages/Dash";
+import Manage from "./pages/Manage";
+// import RetirementCalc from "./pages/RetirementCalc"
 
-import Footer from "./Footer";
+import Footer from "./components/Footer";
 
 function Layout({ functions }) {
   const [toggled, setToggled] = useState(false);
@@ -29,6 +30,7 @@ function Layout({ functions }) {
         <Routes>
           <Route path="/" element={<Dash functions={functions} />} />
           <Route path="manage" element={<Manage />} />
+          {/* <Route path="retirement-calculator" element={<RetirementCalc />} /> */}
         </Routes>
         {/* <Footer /> */}
         </div>

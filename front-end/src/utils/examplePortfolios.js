@@ -68,7 +68,7 @@ export const defaultPortfolio = [
     show: true,
   },
   {
-    ticker: "Da Crib",
+    ticker: "My House",
     shares: 1,
     type: "Real Estate",
     account: "Fannie",
