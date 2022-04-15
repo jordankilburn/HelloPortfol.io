@@ -8,8 +8,8 @@ const app = express();
 
 const whitelist = [
   "http://localhost:3000",
-  "https://helloportfoldotio.netlify.app/",
-  "https://helloportfol.io/",
+  "https://helloportfoldotio.netlify.app",
+  "https://helloportfol.io",
 ]; //white list consumers
 const corsOptions = {
   origin: function (origin, callback) {
