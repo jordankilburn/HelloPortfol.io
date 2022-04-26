@@ -1,0 +1,100 @@
+export const exampleData = [
+  {
+    "Asset Type": "NFT",
+    "Ticker / Address / Name":
+      "0xf87e31492faf9a91b02ee0deaad50d51d56d5d4d/115792089237316195423570985008687907845103207859538040916336593429550692564966",
+    "Quantity / Shares": 1,
+    Value: "",
+    Nickname: "Decentraland: Parcel -25,-26",
+  },
+  {
+    "Asset Type": "Real Estate",
+    "Ticker / Address / Name": "A Californian Shack",
+    "Quantity / Shares": 1,
+    Value: 450000,
+    Nickname: "",
+  },
+  {
+    "Asset Type": "Crypto",
+    "Ticker / Address / Name": "BTC",
+    "Quantity / Shares": 3.24,
+    Value: "",
+    Nickname: "",
+  },
+  {
+    "Asset Type": "Stock",
+    "Ticker / Address / Name": "TSLA",
+    "Quantity / Shares": 10,
+    Value: "",
+    Nickname: "",
+  },
+  {
+    "Asset Type": "Liability",
+    "Ticker / Address / Name": "Home Loan",
+    "Quantity / Shares": 1,
+    Value: -100000,
+    Nickname: "",
+  },
+  {
+    "Asset Type": "Crypto",
+    "Ticker / Address / Name": "ETH",
+    "Quantity / Shares": 2,
+    Value: "",
+    Nickname: "",
+  },
+  {
+    "Asset Type": "Private Business",
+    "Ticker / Address / Name": "Quality Meat LLC",
+    "Quantity / Shares": 1,
+    Value: 150000,
+    Nickname: "",
+  },
+];
+
+export const defaultPortfolio = [
+  {
+    ticker: "0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d/3370",
+    shares: 1,
+    nickname: "Bored Ape 3370",
+    type: "NFT",
+    account: "Merril",
+    show: true,
+  },
+  {
+    ticker: "AMD",
+    shares: 295,
+    type: "Stock",
+    account: "Merril",
+    show: true,
+  },
+  {
+    ticker: "My House",
+    shares: 1,
+    type: "Real Estate",
+    account: "Fannie",
+    value: 225000,
+    show: true,
+  },
+  {
+    ticker: "TSLA",
+    shares: 50,
+    type: "Stock",
+    account: "Merril",
+    show: true,
+  },
+  {
+    account: "Coinbase",
+    type: "Crypto",
+    ticker: "BTC",
+    shares: 1.234,
+    show: true,
+  },
+  {
+    account: "Fannie",
+    type: "Liability",
+    ticker: "Home Loan",
+    shares: 1,
+    value: -180000,
+    show: true,
+  },
+];
