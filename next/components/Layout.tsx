@@ -4,6 +4,8 @@ import "react-toastify/dist/ReactToastify.css";
 
 import Topbar from "./Topbar";
 import Aside from "./Aside";
+import Head from "next/head";
+import Meta from "./Meta";
 
 // import Footer from "./components/Footer";
 
@@ -21,11 +23,12 @@ function Layout({ children }: Props) {
 
   return (
     <div className={`app ${toggled ? "toggled" : ""}`}>
-      <ToastContainer limit={2} position='top-center' />
+      <Meta />
+      <ToastContainer limit={2} position="top-center" />
       <Aside toggled={toggled} handleToggleSidebar={handleToggleSidebar} />
       <main>
         <Topbar handleToggleSidebar={handleToggleSidebar} />
-        <div className='content'>{children}</div>
+        <div className="content">{children}</div>
       </main>
     </div>
   );
