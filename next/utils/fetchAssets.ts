@@ -1,4 +1,5 @@
 import axios from "axios";
+import { AssetInfo, BasePortfolioAsset, HistoricalAsset } from "../types";
 import supportedCryptos from "./supportedCryptos";
 const baseAPI =
   process.env.NODE_ENV === "development"
@@ -6,12 +7,20 @@ const baseAPI =
     : "https://portfolio-tracker-express.herokuapp.com";
 const baseCrypyoAPI = "https://api.coingecko.com/api/v3/coins";
 
-export default async ({ basePortfolioAssets, startDate, endDate }) => {
+type Dates = {
+  startDate: Date;
+  endDate: Date;
+};
+type Props = Dates & {
+  basePortfolioAssets: BasePortfolioAsset[];
+};
+
+export default async ({ basePortfolioAssets, startDate, endDate }: Props) => {
   return new Promise(async function (resolve, reject) {
-    let tickers = [];
-    let cryptos = [];
-    let nfts = [];
-    let untracked = [];
+    let tickers: string[] = [];
+    let cryptos: string[] = [];
+    let nfts: string[] = [];
+    let untracked: BasePortfolioAsset[] = [];
 
     basePortfolioAssets.forEach((asset) => {
       if (asset.type == "Stock") tickers.push(asset.ticker);
@@ -20,8 +29,8 @@ export default async ({ basePortfolioAssets, startDate, endDate }) => {
       else untracked.push(asset);
     });
 
-    const date1 = new Date(startDate);
-    const date2 = new Date(endDate);
+    const date1 = new Date(startDate).getTime();
+    const date2 = new Date(endDate).getTime();
 
     const diffDays = Math.ceil(Math.abs(date2 - date1) / (1000 * 60 * 60 * 24));
     //determine spacing on days
@@ -53,7 +62,7 @@ export default async ({ basePortfolioAssets, startDate, endDate }) => {
         const date1ts = startDate.getTime();
         const date2ts = endDate.getTime();
 
-        let reply = {};
+        let reply: HistoricalAsset = {};
         for (let i = 0; i < cryptos.length; i++) {
           const coin = cryptos[i];
           const coinName = supportedCryptos.find(
@@ -67,7 +76,7 @@ export default async ({ basePortfolioAssets, startDate, endDate }) => {
             .catch((e) => {
               return reject(`Problem finding ${coin}`);
             });
-          if (thisCoinRaw.data && thisCoinRaw.data.prices) {
+          if (thisCoinRaw && thisCoinRaw.data && thisCoinRaw.data.prices) {
             const prices = thisCoinRaw.data.prices;
             let pricesFormatted = [];
             for (let j = 0; j < prices.length; j++) {
@@ -100,14 +109,15 @@ export default async ({ basePortfolioAssets, startDate, endDate }) => {
           .catch((e) => {
             return reject(`Problem fetching NFTs`);
           });
-
-        resolve(fillAllDays({ stocks: res.data, startDate, endDate }));
+        if (res && res.data)
+          resolve(fillAllDays({ stocks: res.data, startDate, endDate }));
+        else resolve(fillAllDays({ stocks: {}, startDate, endDate }));
       });
     };
 
     const fetchUntracked = () => {
       return new Promise(async function (resolve, reject) {
-        let reply = {};
+        let reply: HistoricalAsset = {};
         for (let i = 0; i < untracked.length; i++) {
           const asset = untracked[i];
           reply[asset.ticker] = [
@@ -123,13 +133,13 @@ export default async ({ basePortfolioAssets, startDate, endDate }) => {
 
     try {
       const combined = {
-        ...(await fetchStocks()),
-        ...(await fetchCrypto()),
-        ...(await fetchNFTs()),
-        ...(await fetchUntracked()),
+        ...((await fetchStocks()) as HistoricalAsset),
+        ...((await fetchCrypto()) as HistoricalAsset),
+        ...((await fetchNFTs()) as HistoricalAsset),
+        ...((await fetchUntracked()) as HistoricalAsset),
       };
 
-      let reply = {};
+      let reply: HistoricalAsset = {};
       if (period !== "d") {
         Object.keys(combined).map((ticker, i) => {
           let days = combined[ticker];
@@ -153,12 +163,16 @@ export default async ({ basePortfolioAssets, startDate, endDate }) => {
   });
 };
 
-export const fillAllDays = ({ stocks, startDate, endDate }) => {
+export const fillAllDays = ({
+  stocks,
+  startDate,
+  endDate,
+}: Dates & { stocks: HistoricalAsset }) => {
   const getDaysArray = () => {
     if (!startDate || !endDate) return [];
     const sd = new Date(startDate);
     const ed = new Date(endDate);
-    let dates = [];
+    let dates: string[] = [];
     //to avoid modifying the original date
     const theDate = sd;
     while (theDate < ed) {
@@ -169,11 +183,11 @@ export const fillAllDays = ({ stocks, startDate, endDate }) => {
     dates = [...dates, new Date(ed).toISOString().slice(0, 10)];
     return dates;
   };
-  const listOfDays = getDaysArray(startDate, endDate);
-  let newStocks = {};
-  Object.keys(stocks).forEach((ticker) => {
+  const listOfDays = getDaysArray();
+  let newStocks: HistoricalAsset = {};
+  Object.keys(stocks).forEach((ticker: string) => {
     const a = stocks[ticker].reverse();
-    let res = [];
+    let res: AssetInfo[] = [];
 
     for (let i = 0, j = 0; i < listOfDays.length; i++) {
       let close;
@@ -195,7 +209,7 @@ export const fillAllDays = ({ stocks, startDate, endDate }) => {
       }
       res[i] = {
         date: listOfDays[i],
-        close,
+        close: close ? close : 0,
       };
     }
 

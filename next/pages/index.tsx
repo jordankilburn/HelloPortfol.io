@@ -12,7 +12,7 @@ import {
 } from "../utils/recoil_states";
 import fetchAssets from "../utils/fetchAssets";
 
-export default () => {
+export default function Dashboard() {
   const [basePortfolioAssets, setBasePortfolioAssets] = useRecoilState(
     basePortfolioAssetsState
   );
@@ -33,10 +33,10 @@ export default () => {
     }
   }, []);
 
-  const setDates = async (range: Date[] | string[]) => {
+  const setDates = async (range: Date[]) => {
     if (range[0] == dateRange[0] && range[1] == dateRange[1]) return;
     setDateRange(range);
-    if (range[0] == "" || range[1] == "" || range.length !== 2) return;
+    if (range.length !== 2) return;
     setLoading(true);
     const id = toast.loading(
       "Loading Portfolio. This might take a while BTW...",
@@ -68,7 +68,7 @@ export default () => {
         autoClose: null,
         closeButton: null,
       });
-      setError({error});
+      setError({ error });
     }
   };
 
@@ -138,4 +138,4 @@ export default () => {
       loading={loading}
     />
   );
-};
+}

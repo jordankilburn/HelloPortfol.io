@@ -5,16 +5,28 @@ import { scaleOrdinal } from "@visx/scale";
 import { GradientPinkBlue } from "@visx/gradient";
 import { useState } from "react";
 import toLocaleFixed from "../utils/toLocaleFixed";
+import { AssetInfo, BasePortfolioAsset } from "../types";
 
 const defaultMargin = { top: 20, right: 20, bottom: 20, left: 20 };
 
-export default function Pie({
+type Props = {
+  parent: any;
+  basePortfolioAssets: BasePortfolioAsset[];
+  netWorth: AssetInfo[];
+  margin?: {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+  };
+};
+export default function PieGraph({
   parent,
   basePortfolioAssets,
   netWorth = [],
   margin = defaultMargin,
-}) {
-  const [active, setActive] = useState(null);
+}: Props) {
+  const [active, setActive] = useState<BasePortfolioAsset | null>(null);
   const { width, height } = parent;
   const innerWidth = width - margin.left - margin.right;
   const innerHeight = height - margin.top - margin.bottom;
@@ -37,7 +49,6 @@ export default function Pie({
           data={basePortfolioAssets.filter((x) => x.show === true)}
           pieValue={(d) => d.value}
           outerRadius={radius}
-          outerRadius={140}
           innerRadius={({ data }) => {
             const size = active && active.ticker == data.ticker ? 90 : 80;
             return 150 - size;
@@ -62,7 +73,7 @@ export default function Pie({
                   onMouseEnter={() => setActive(arc.data)}
                   onMouseLeave={() => setActive(null)}
                 >
-                  <path d={arcPath} fill={arcFill} />
+                  <path d={arcPath ? arcPath : undefined} fill={arcFill} />
                   {hasSpaceForLabel && (
                     <text
                       x={centroidX}

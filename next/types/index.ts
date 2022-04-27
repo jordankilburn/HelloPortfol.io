@@ -6,6 +6,7 @@ export type BasePortfolioAsset = {
   account: string;
   show: boolean;
   value: number;
+  color?:string;
 };
 
 export type AssetType = {
@@ -14,5 +15,14 @@ export type AssetType = {
   ticker: string;
   tickerPlaceholder: string;
   value?: string;
-  nickname?:string;
+  nickname?: string;
+};
+
+export type AssetInfo = {
+  date: string | Date;
+  close: number;
+};
+
+export type HistoricalAsset = {
+  [key: string]: AssetInfo[];
 };

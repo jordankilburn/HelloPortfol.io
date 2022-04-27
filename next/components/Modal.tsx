@@ -1,6 +1,19 @@
 import { Modal } from "react-responsive-modal";
 
-export default function Manage({ headline, body, open, setOpen, customClass }) {
+type Props = {
+  headline:string;
+  body:JSX.Element;
+  open:boolean;
+  setOpen:Function;
+  customClass:string;
+};
+export default function Manage({
+  headline,
+  body,
+  open,
+  setOpen,
+  customClass,
+}: Props) {
   if (open)
     return (
       <Modal

@@ -337,6 +337,14 @@
   dependencies:
     "@types/react" "*"
 
+"@types/react-flatpickr@^3.8.6":
+  version "3.8.6"
+  resolved "https://registry.yarnpkg.com/@types/react-flatpickr/-/react-flatpickr-3.8.6.tgz#5ecd5ba47d4f32a20d9045b41e047e6e16cc2e69"
+  integrity sha512-EhlqO1P0jnlTyYMHgaXRcuWxBqdVtmepl5j9FxoZS8jBxyx1z6AN8K4/WyYS4ijiMsBNDGyagjRXQbAfgvao4w==
+  dependencies:
+    "@types/react" "*"
+    flatpickr "^4.0.6"
+
 "@types/react@*", "@types/react@18.0.7":
   version "18.0.7"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-18.0.7.tgz#8437a226763adf854969954dfe582529a406cbad"
@@ -1377,7 +1385,7 @@ flat-cache@^3.0.4:
     flatted "^3.1.0"
     rimraf "^3.0.2"
 
-flatpickr@^4.6.2:
+flatpickr@^4.0.6, flatpickr@^4.6.2:
   version "4.6.13"
   resolved "https://registry.yarnpkg.com/flatpickr/-/flatpickr-4.6.13.tgz#8a029548187fd6e0d670908471e43abe9ad18d94"
   integrity sha512-97PMG/aywoYpB4IvbvUJi0RQi8vearvU0oov1WW3k0WZPBMrTQVqekSX5CjSG/M4Q3i6A/0FKXC7RyAoAUUSPw==
