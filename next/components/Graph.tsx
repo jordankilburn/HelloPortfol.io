@@ -148,11 +148,11 @@ export default function Graph({ historicalAssets, flatpickr, loading }: Props) {
   const [normalizedAssets, setNormalizedAssets] =
     useRecoilState<HistoricalAsset>(normalizedAssetsState);
   const [combineAll, setCombineAll] = useRecoilState(combineAllState);
-  const [netWorth, setNetWorth] = useRecoilState(netWorthState);
+  const [netWorth, setNetWorth] = useRecoilState<AssetInfo[]>(netWorthState);
   const [sortedBy, setSortedBy] = useRecoilState(sortedByState);
   useEffect(() => {
     if (historicalAssets != null) {
-      let newNetworth = [];
+      let newNetworth:AssetInfo[] = [];
       let newNormalizedAssets: HistoricalAsset = {};
       for (let i = 0; i < basePortfolioAssets.length; i++) {
         const p = basePortfolioAssets[i];

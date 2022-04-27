@@ -17,6 +17,7 @@ import {
   FaGithub,
   FaRegLaughWink,
   FaHeart,
+  FaFire
 } from "react-icons/fa";
 
 type Props = {
@@ -63,6 +64,11 @@ const Aside = ({ toggled, handleToggleSidebar }: Props) => {
           <Link href='/manage'>
            
               <MenuItem icon={<FaList />}>Manage</MenuItem>
+           
+          </Link>
+          <Link href='/retirement-calculator'>
+           
+              <MenuItem icon={<FaFire />}>F.I.R.E.</MenuItem>
            
           </Link>
           {/* <MenuItem icon={<FaTachometerAlt />}>

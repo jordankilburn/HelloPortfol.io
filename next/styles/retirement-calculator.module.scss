@@ -1,0 +1,50 @@
+.flexForms {
+  display: flex;
+  max-width: 700px;
+  margin: 0 auto;
+  
+ @media (max-width: 768px) {
+    flex-direction: column;
+  }
+}
+.inputForm {
+    margin: 0 auto;
+    padding: 0 1rem;
+  .row {
+      position: relative;
+    width: 100%;
+    display: flex;
+    margin-bottom: 3px;
+    justify-content: flex-end;
+  }
+
+  label {
+    margin-right: 1rem;
+    display: flex;
+    justify-content: right;
+    align-items: center;
+  }
+  input {
+    width: 100px;
+  }
+  .withPost {
+      padding-right: 25px;
+  }
+  .postInput {
+    pointer-events:none;
+      position: absolute;
+      top: 25%;
+      right: 10px;
+  }
+  /* Chrome, Safari, Edge, Opera */
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  /* Firefox */
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+}

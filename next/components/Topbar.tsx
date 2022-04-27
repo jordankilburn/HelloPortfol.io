@@ -14,7 +14,7 @@ export default function TopBar({ handleToggleSidebar }: Props) {
         <FaBars />
       </div>
       <div className="topbar">
-        <span>
+        {/* <span>
           Add/Remove assets in{" "}
           <Link href="/manage">
             <a>Manage</a>
@@ -24,7 +24,7 @@ export default function TopBar({ handleToggleSidebar }: Props) {
             <a>Dashboard</a>
           </Link>
           .
-        </span>
+        </span> */}
       </div>
     </header>
   );
