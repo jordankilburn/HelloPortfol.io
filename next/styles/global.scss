@@ -1,19 +1,8 @@
-@import "react-responsive-modal/styles.css";
-$main-blue: #4f86c6;
-$main-green: #23a455;
-$main-red: #ff5964;
-$main-bg-color: #f1f5f9;
-$sidebar-bg-color: #0c1e35;
-$submenu-bg-color: rgba(255, 255, 255, 0.05);
-$submenu-bg-color-collapsed: rgba(#0c1e35, 0.95);
-$sidebar-color: #b3b8d4;
-$highlight-color: #dee2ec;
-$icon-bg-color: rgba(255, 255, 255, 0.05);
-$icon-size: 25px;
-$sidebar-width: 170px !default;
-$main-font-color: #353535;
 
+@import "react-responsive-modal/styles.css";
+@import './variables.scss';
 @import "~react-pro-sidebar/dist/scss/styles.scss";
+
 body {
   margin: 0;
   height: 100vh;
@@ -446,7 +435,7 @@ button:hover {
 
 .tooltip .tooltiptext {
   visibility: hidden;
-  width: 250px;
+  max-width: 150px;
   padding: 0.25rem 1rem;
   background-color: $main-font-color;
   color: #fff;
@@ -455,7 +444,7 @@ button:hover {
   position: absolute;
   z-index: 1;
   bottom: 110%;
-  right: -50%;
+  right: 0%;
   margin-left: -60px;
   opacity: 0;
   transition: opacity 1s;

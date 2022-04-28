@@ -1,12 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { useRecoilState } from "recoil";
-import { basePortfolioAssetsState } from "../utils/recoil_states";
+import {
+  basePortfolioAssetsState,
+  retirementCalcInputState,
+} from "../utils/recoil_states";
 import { BasePortfolioAsset } from "../types";
 import toLocaleFixed from "../utils/toLocaleFixed";
 import styles from "../styles/retirement-calculator.module.scss";
 import CustomBG from "../components/CustomChartBackground";
 import { ParentSize } from "@visx/responsive";
-import { AnimatedAreaSeries, AnimatedAxis, buildChartTheme, Tooltip, XYChart } from "@visx/xychart";
+import {
+  AnimatedAreaSeries,
+  AnimatedAxis,
+  Axis,
+  buildChartTheme,
+  XYChart,
+  Tooltip,
+} from "@visx/xychart";
 import { LinearGradient } from "@visx/gradient";
 import { Group } from "@visx/group";
 import { Line } from "@visx/shape";
@@ -17,6 +27,12 @@ type Outputs = {
   retireNumb: number;
   savingsRate: number;
   years: number[];
+  oom: number;
+};
+
+const accessors = {
+  xAccessor: (d: { year: number }) => d.year,
+  yAccessor: (d: { nw: number }) => d.nw,
 };
 
 export default function Dashboard() {
@@ -27,20 +43,25 @@ export default function Dashboard() {
     retireNumb: 0,
     savingsRate: 0,
     years: [],
+    oom: 100,
   });
 
-  const [inputs, setInputs] = useState({
-    income: 60000,
-    spending: 3000,
-    spendingR: 2000,
-    portfolio: 100000,
-    withdrawalRate: 4,
-    roi: 7,
-  });
+  const [inputs, setInputs] = useRecoilState(retirementCalcInputState);
+
+  useEffect(() => {
+    if (inputs.portfolio != 0) return;
+
+    const portfolio = basePortfolioAssets
+      .reduce((a: number, b: BasePortfolioAsset) => a + (b.value || 0), 0)
+      .toFixed(0);
+
+    setInputs({ ...inputs, portfolio });
+  }, []);
 
   useEffect(() => {
     const { spendingR, withdrawalRate, portfolio, income, spending, roi } =
       inputs;
+    if (income <= 0) return;
     let numbYears = 0;
     const retireNumb = (spendingR * 12) / (withdrawalRate / 100);
     const m = retireNumb; //# to save until
@@ -51,20 +72,48 @@ export default function Dashboard() {
     // https://math.stackexchange.com/questions/1698578
     //on Wolfram: solve(m=(P+A/i)Power[(1+i),n]-A/i,n)
     numbYears = Math.log((A + i * m) / (A + i * P)) / Math.log(1 + i);
+
     let years = [];
     let year = 0;
-    let nw = portfolio;
-    while (nw < retireNumb) {
+    let nw = Number(portfolio);
+    let retired = false;
+
+    let oom = Infinity; //out of money year?
+    const spendingRY = -spendingR * 12;
+    // oom = Math.log((spendingRY/(spendingRY+ i * m))) / Math.log(1 + i);
+    // if (isNaN(oom)) oom = Infinity
+
+    while (years.length < 301) {
       years.push(nw);
-      nw = nw * (1 + i) + A;
+      if (nw <= 0 && years.length > numbYears) {
+        if (oom == Infinity) oom = year - 1;
+      }
+
+      if (nw >= retireNumb) {
+        retired = true;
+        if (isNaN(numbYears)) numbYears = year;
+      }
+
+      if (!retired) {
+        if (nw >= 0) nw = nw * (1 + i) + A;
+        else nw = nw + A;
+      } else
+        nw = Math.min(
+          nw * (1 + i) + spendingRY,
+          nw * (1 + i - withdrawalRate / 100)
+        );
+
+      
       year++;
     }
-    while (years.length < 51) {
-      years.push(nw);
-      nw = nw * (1 + i-(withdrawalRate / 100));
-      year++;
-    }
-    setOutputs({ numbYears, retireNumb, savingsRate, years });
+    if (isNaN(numbYears)) numbYears = Infinity;
+    setOutputs({
+      numbYears,
+      retireNumb,
+      savingsRate,
+      years: years.slice(0, 51),
+      oom,
+    });
   }, [inputs]);
 
   const handleInputs = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -73,20 +122,14 @@ export default function Dashboard() {
 
   return (
     <div className="center">
-      <h3>
-        Total Net Worth | $
-        {toLocaleFixed(
-          basePortfolioAssets.reduce(
-            (a: number, b: BasePortfolioAsset) => a + (b.value || 0),
-            0
-          )
-        )}
-      </h3>
+      <h2>Early Retirement Calculator</h2>
       <div className={styles.flexForms}>
         <div className={styles.inputForm}>
           <h4>Current Finances</h4>
           <div className={styles.row}>
-            <label>Yearly Income:</label>
+            <label className="tooltip">Yearly Income:<span className="tooltiptext">
+                After tax.
+              </span></label>
             <input
               type="number"
               value={inputs.income}
@@ -104,7 +147,9 @@ export default function Dashboard() {
             />
           </div>
           <div className={styles.row}>
-            <label>Portfolio Value:</label>
+            <label className="tooltip">Portfolio Value:<span className="tooltiptext">
+                You can use negative numbers if you're in debt.
+              </span></label>
             <input
               type="number"
               value={inputs.portfolio}
@@ -164,110 +209,217 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-      retireNumb: {toLocaleFixed(outputs.retireNumb)}
-      <br />
-      numbYears: {outputs.numbYears.toFixed(1)}
-      <br />
-      {/* {outputs.years.map((nw, i) => (
-        <>
-          {i} : {toLocaleFixed(nw)}
+      <div className={`row ${styles.outputs}`}>
+        <div className="item">
+          You need <b className="green">{toLocaleFixed(outputs.retireNumb)}</b>{" "}
+          to retire.
           <br />
-        </>
-      ))} */}
-              <ParentSize style={{ paddingLeft: 0, paddingRight: 0 }}>
-          {(parent) => {
-            return (
-              <XYChart
-                width={350}
-                height={350}
-                xScale={{
-                  type:"linear"
-                }}
-                yScale={{ type: "linear" }}
-                theme={buildChartTheme({
-                  backgroundColor: "#F1F5F9",
-                  gridColor: "#336d88",
-                  svgLabelBig: { fill: "#1d1b38" },
-                  tickLength: 8,
-                  colors: [],
-                  gridColorDark: "",
-                })}
-              >
-                <CustomBG />
-                
-                  <LinearGradient from="#4F86C6" to="#4FB0C6" id="gradient" />
-                
-                <AnimatedAxis
-                  orientation="bottom"
-                  numTicks={7}
-                  tickFormat={(val) => `Year ${val}`}
-                >
-                  {(props) => {
-                    const tickLabelSize = 11;
-                    const tickRotate = 20;
-                    const tickColor = "#336d88";
-                    const fontColor = "#495057";
-                    const axisCenter =
-                      (props.axisToPoint.x - props.axisFromPoint.x) / 2;
-                    return (
-                      <g className="my-custom-bottom-axis">
-                        {props.ticks.map((tick, i) => {
-                          const tickX = tick.to.x;
-                          const tickY =
-                            tick.to.y + tickLabelSize + (props.tickLength || 0);
-                          return (
-                            <Group
-                              key={`vx-tick-${tick.value}-${i}`}
-                              className={"vx-axis-tick"}
-                            >
-                              <Line
-                                from={tick.from}
-                                to={tick.to}
-                                stroke={tickColor}
-                              />
-                              <text
-                                transform={`translate(${tickX}, ${tickY}) rotate(${tickRotate})`}
-                                fontSize={tickLabelSize}
-                                textAnchor="middle"
-                                fill={fontColor}
-                              >
-                                {tick.formattedValue}
-                              </text>
-                            </Group>
-                          );
-                        })}
-                        <text
-                          textAnchor="middle"
-                          transform={`translate(${axisCenter}, 50)`}
-                          fontSize="8"
-                        >
-                          {props.label}
-                        </text>
-                      </g>
-                    );
+          {outputs.numbYears <= 0 ? (
+            `You have that today!`
+          ) : (
+            <span>
+              {" "}
+              You'll have that in{" "}
+              <b className="green">
+                {toLocaleFixed(outputs.numbYears, 1)}
+              </b>{" "}
+              years.
+            </span>
+          )}
+          <br />
+          {outputs.oom == Infinity ? (
+            <span>
+              And then, you'll <i>never run out of money!</i>
+            </span>
+          ) : (
+            <span>
+              However, you'll run out of money in{" "}
+              <b className="red">{toLocaleFixed(outputs.oom, 0)}</b> years.
+            </span>
+          )}
+          <ParentSize style={{ paddingLeft: 0, paddingRight: 0 }}>
+            {(parent) => {
+              return (
+                <XYChart
+                  width={350}
+                  height={350}
+                  xScale={{
+                    type: "linear",
                   }}
-                </AnimatedAxis>
-                <AnimatedAxis
-                  labelOffset={2}
-                  orientation="left"
-                  tickFormat={(val) =>
-                    `$${numbFormat(val)}`
-                  }
-                />
+                  yScale={{ type: "linear" }}
+                  theme={buildChartTheme({
+                    backgroundColor: "#F1F5F9",
+                    gridColor: "#336d88",
+                    svgLabelBig: { fill: "#1d1b38" },
+                    tickLength: 8,
+                    colors: [],
+                    gridColorDark: "",
+                  })}
+                >
+                  <CustomBG />
+
+                  <LinearGradient from="#4F86C6" to="#4FB0C6" id="gradient" />
+
+                  <AnimatedAxis
+                    orientation="bottom"
+                    numTicks={7}
+                    tickFormat={(val) => `Year ${val}`}
+                  >
+                    {(props) => {
+                      const tickLabelSize = 11;
+                      const tickRotate = 20;
+                      const tickColor = "#336d88";
+                      const fontColor = "#495057";
+                      const axisCenter =
+                        (props.axisToPoint.x - props.axisFromPoint.x) / 2;
+                      return (
+                        <g className="my-custom-bottom-axis">
+                          {props.ticks.map((tick, i) => {
+                            const tickX = tick.to.x;
+                            const tickY =
+                              tick.to.y +
+                              tickLabelSize +
+                              (props.tickLength || 0);
+                            return (
+                              <Group
+                                key={`vx-tick-${tick.value}-${i}`}
+                                className={"vx-axis-tick"}
+                              >
+                                <Line
+                                  from={tick.from}
+                                  to={tick.to}
+                                  stroke={tickColor}
+                                />
+                                <text
+                                  transform={`translate(${tickX}, ${tickY}) rotate(${tickRotate})`}
+                                  fontSize={tickLabelSize}
+                                  textAnchor="middle"
+                                  fill={fontColor}
+                                >
+                                  {tick.formattedValue}
+                                </text>
+                              </Group>
+                            );
+                          })}
+                          <text
+                            textAnchor="middle"
+                            transform={`translate(${axisCenter}, 50)`}
+                            fontSize="8"
+                          >
+                            {props.label}
+                          </text>
+                        </g>
+                      );
+                    }}
+                  </AnimatedAxis>
+                  <Axis
+                    labelOffset={2}
+                    orientation="left"
+                    tickFormat={(val) => `${numbFormat(val)}`}
+                  />
                   <AnimatedAreaSeries
                     fill="url('#gradient')"
                     dataKey={"Net Worth"}
                     // curve={curveCardinal}
-                    data={outputs.years.map((nw,i)=>({nw,year:i}))}
+                    data={outputs.years.map((nw, i) => ({ nw, year: i }))}
                     xAccessor={(d) => d.year}
                     yAccessor={(d) => d.nw}
                     fillOpacity={0.4}
                   />
-                  
-              </XYChart>
-            );
-          }}
-        </ParentSize>
+                  <Tooltip
+                    showDatumGlyph
+                    snapTooltipToDatumX
+                    snapTooltipToDatumY
+                    showVerticalCrosshair
+                    // showHorizontalCrosshair
+                    showSeriesGlyphs
+                    renderTooltip={({ tooltipData, colorScale }) => {
+                      const date = accessors.xAccessor(
+                        tooltipData?.nearestDatum?.datum as { year: number }
+                      );
+
+                      return (
+                        <div style={{ fontFamily: "Roboto" }}>
+                          <span>Year {date}</span>:{" "}
+                          <span
+                            className={
+                              accessors.yAccessor(
+                                tooltipData?.nearestDatum?.datum as {
+                                  nw: number;
+                                }
+                              ) <= 0
+                                ? "red"
+                                : "green"
+                            }
+                          >
+                            {toLocaleFixed(
+                              accessors.yAccessor(
+                                tooltipData?.nearestDatum?.datum as {
+                                  nw: number;
+                                }
+                              )
+                            )}
+                          </span>
+                        </div>
+                      );
+                    }}
+                  />
+                </XYChart>
+              );
+            }}
+          </ParentSize>
+        </div>
+        <div className="item">
+          <div className={`table-wrapper ${styles.retireTable}`}>
+            <table>
+              <thead>
+                <tr>
+                  <th>Year</th>
+                  <th>I/O</th>
+                  <th>Return ({inputs.roi}%)</th>
+                  <th>Net Worth</th>
+                </tr>
+              </thead>
+              <tbody>
+                {outputs.years.map((year, i) => {
+                  // if (i < outputs.numbYears + 1 || i == 0)
+                  return (
+                    <tr
+                      key={i}
+                      className={
+                        year >= outputs.retireNumb
+                          ? "green"
+                          : year <= 0
+                          ? "red"
+                          : ""
+                      }
+                    >
+                      <td>{i}</td>
+                      <td>
+                        {i < outputs.numbYears
+                          ? toLocaleFixed(
+                              outputs.savingsRate * inputs.income,
+                              0
+                            )
+                          : toLocaleFixed(-inputs.spendingR * 12, 0)}
+                      </td>
+                      <td>
+                        {i == 0
+                          ? 0
+                          : toLocaleFixed(
+                              (inputs.roi / 100) * outputs.years[i - 1],
+                              0
+                            )}
+                      </td>
+                      <td>{toLocaleFixed(year, 0)}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -45,3 +45,16 @@ export const basePortfolioAssetsState = atom({
   default: defaultPortfolio,
   effects_UNSTABLE: [persistAtom],
 });
+
+export const retirementCalcInputState = atom({
+  key: "retirementCalcInputState", // unique ID (with respect to other atoms/selectors)
+  default: {
+    income: 60000,
+    spending: 3000,
+    spendingR: 2000,
+    portfolio: 0,
+    withdrawalRate: 4,
+    roi: 7,
+  },
+  effects_UNSTABLE: [persistAtom],
+});
