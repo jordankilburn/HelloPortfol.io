@@ -189,7 +189,7 @@ export default function Manage() {
           <h2>Manage Assets/Liabilities</h2>
           {/* <p>Add/Remove assets from portfolio</p> */}
           {/* {basePortfolioAssets.length < 20 ? ( */}
-          <div style={{ width: "100%", display: "flex" }}>
+          <div className="flex-buttons">
             <button className='green-button' onClick={() => setOpen(true)}>
               Add Asset
             </button>
@@ -205,7 +205,7 @@ export default function Manage() {
           {basePortfolioAssets.length > 0 && (
             <div
               className='table-wrapper'
-              style={{ maxHeight: "100%", overflow: "auto" }}
+              style={{ maxHeight: "100%", overflow: "auto", marginBottom:'3rem',marginTop:'1rem' }}
             >
               <table style={{ width: "100%" }}>
                 <thead style={{ textAlign: "left" }}>
@@ -236,7 +236,7 @@ export default function Manage() {
                           {/* <td>{asset.account}</td> */}
                           <td>{asset.nickname || asset.ticker}</td>
                           <td>{asset.type}</td>
-                          <td>{toLocaleFixed(asset.shares)}</td>
+                          <td>{toLocaleFixed(asset.shares,asset.shares>=1?0:2)}</td>
                           <td className={asset.value < 0 ? "red" : "green"}>
                             ${toLocaleFixed(asset.value)}
                           </td>

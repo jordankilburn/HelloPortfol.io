@@ -112,7 +112,6 @@ export default function CsvReader({
       <button onClick={downloadCSV}>Download Portfolio</button>
       <button
         className='red-button'
-        style={{ marginLeft: "auto" }}
         onClick={() => setOpenErase(true)}
       >
         Erase Portfolio

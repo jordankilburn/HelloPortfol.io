@@ -79,11 +79,8 @@ export default function Dashboard() {
     let retired = false;
 
     let oom = Infinity; //out of money year?
-    const spendingRY = -spendingR * 12;
-    // oom = Math.log((spendingRY/(spendingRY+ i * m))) / Math.log(1 + i);
-    // if (isNaN(oom)) oom = Infinity
 
-    while (years.length < 301) {
+    while (years.length < 301) { //only check for 300 years
       years.push(nw);
       if (nw <= 0 && years.length > numbYears) {
         if (oom == Infinity) oom = year - 1;
@@ -99,8 +96,8 @@ export default function Dashboard() {
         else nw = nw + A;
       } else
         nw = Math.min(
-          nw * (1 + i) + spendingRY,
-          nw * (1 + i - withdrawalRate / 100)
+          nw * (1 + i) -spendingR * 12,
+          // nw * (1 + i - withdrawalRate / 100) 
         );
 
       
@@ -121,7 +118,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="center">
+    <div className="center" style={{marginBottom:'3rem'}}>
       <h2>Early Retirement Calculator</h2>
       <div className={styles.flexForms}>
         <div className={styles.inputForm}>
