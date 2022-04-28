@@ -80,7 +80,8 @@ export default function Dashboard() {
 
     let oom = Infinity; //out of money year?
 
-    while (years.length < 301) { //only check for 300 years
+    while (years.length < 301) {
+      //only check for 300 years
       years.push(nw);
       if (nw <= 0 && years.length > numbYears) {
         if (oom == Infinity) oom = year - 1;
@@ -96,11 +97,10 @@ export default function Dashboard() {
         else nw = nw + A;
       } else
         nw = Math.min(
-          nw * (1 + i) -spendingR * 12,
-          // nw * (1 + i - withdrawalRate / 100) 
+          nw * (1 + i) - spendingR * 12
+          // nw * (1 + i - withdrawalRate / 100)
         );
 
-      
       year++;
     }
     if (isNaN(numbYears)) numbYears = Infinity;
@@ -118,15 +118,15 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="center" style={{marginBottom:'3rem'}}>
+    <div className="center" style={{ marginBottom: "3rem" }}>
       <h2>Early Retirement Calculator</h2>
       <div className={styles.flexForms}>
         <div className={styles.inputForm}>
           <h4>Current Finances</h4>
           <div className={styles.row}>
-            <label className="tooltip">Yearly Income:<span className="tooltiptext">
-                After tax.
-              </span></label>
+            <label className="tooltip">
+              Yearly Income:<span className="tooltiptext">After tax.</span>
+            </label>
             <input
               type="number"
               value={inputs.income}
@@ -144,9 +144,12 @@ export default function Dashboard() {
             />
           </div>
           <div className={styles.row}>
-            <label className="tooltip">Portfolio Value:<span className="tooltiptext">
+            <label className="tooltip">
+              Portfolio Value:
+              <span className="tooltiptext">
                 You can use negative numbers if you're in debt.
-              </span></label>
+              </span>
+            </label>
             <input
               type="number"
               value={inputs.portfolio}
@@ -215,11 +218,8 @@ export default function Dashboard() {
             `You have that today!`
           ) : (
             <span>
-              {" "}
               You'll have that in{" "}
-              <b className="green">
-                {toLocaleFixed(outputs.numbYears, 1)}
-              </b>{" "}
+              <b className="green">{toLocaleFixed(outputs.numbYears, 1)}</b>{" "}
               years.
             </span>
           )}
