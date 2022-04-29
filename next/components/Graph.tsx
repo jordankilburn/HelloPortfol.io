@@ -17,14 +17,13 @@ import Pie from "./Pie";
 import toLocaleFixed from "../utils/toLocaleFixed";
 import { useRecoilState } from "recoil";
 import {
-  basePortfolioAssetsState,
   normalizedAssetsState,
   netWorthState,
   combineAllState,
-  sortedByState,
 } from "../utils/recoil_states";
 import currency from "currency.js";
 import { HistoricalAsset, AssetInfo, BasePortfolioAsset } from "../types";
+import Table from "./Table";
 
 const accessors = {
   xAccessor: (d: AssetInfo) => new Date(d.date),
@@ -139,23 +138,28 @@ type Props = {
   flatpickr: JSX.Element;
   loading: boolean;
   historicalAssets: HistoricalAsset;
+  assets: BasePortfolioAsset[];
+  setAssets: Function;
 };
 
-export default function Graph({ historicalAssets, flatpickr, loading }: Props) {
-  const [basePortfolioAssets, setBasePortfolioAssets] = useRecoilState(
-    basePortfolioAssetsState
-  );
+export default function Graph({
+  historicalAssets,
+  flatpickr,
+  loading,
+  assets,
+  setAssets,
+}: Props) {
   const [normalizedAssets, setNormalizedAssets] =
     useRecoilState<HistoricalAsset>(normalizedAssetsState);
   const [combineAll, setCombineAll] = useRecoilState(combineAllState);
   const [netWorth, setNetWorth] = useRecoilState<AssetInfo[]>(netWorthState);
-  const [sortedBy, setSortedBy] = useRecoilState(sortedByState);
+
   useEffect(() => {
     if (historicalAssets != null) {
-      let newNetworth:AssetInfo[] = [];
+      let newNetworth: AssetInfo[] = [];
       let newNormalizedAssets: HistoricalAsset = {};
-      for (let i = 0; i < basePortfolioAssets.length; i++) {
-        const p = basePortfolioAssets[i];
+      for (let i = 0; i < assets.length; i++) {
+        const p = assets[i];
         if (!p.show) continue;
         const tickerData = historicalAssets[p.ticker];
         if (tickerData == null || tickerData.length < 1) continue;
@@ -180,21 +184,19 @@ export default function Graph({ historicalAssets, flatpickr, loading }: Props) {
       setNormalizedAssets(newNormalizedAssets);
       setNetWorth(newNetworth);
     }
-  }, [basePortfolioAssets]);
+  }, [assets]);
 
   useEffect(() => {
     //set what to show
     let newBFA = [];
 
-    for (let i = 0; i < basePortfolioAssets.length; i++) {
-      const p = basePortfolioAssets[i];
+    for (let i = 0; i < assets.length; i++) {
+      const p = assets[i];
 
       if (newBFA[i]) newBFA[i].shares += p.shares;
       else {
         newBFA[i] = Object.assign({}, p);
-        newBFA[i].show = basePortfolioAssets[i]
-          ? basePortfolioAssets[i].show
-          : true;
+        newBFA[i].show = assets[i] ? assets[i].show : true;
         newBFA[i].color =
           i > fundColors.length - 1
             ? fundColors[fundColors.length - 1]
@@ -214,55 +216,8 @@ export default function Graph({ historicalAssets, flatpickr, loading }: Props) {
       }
     }
 
-    setBasePortfolioAssets(newBFA);
+    setAssets(newBFA);
   }, [historicalAssets]);
-
-  const sortBy = (sortType: string) => {
-    const newSort = JSON.parse(JSON.stringify(basePortfolioAssets));
-    switch (sortType) {
-      case "Value":
-        sortedBy === "asc"
-          ? newSort.sort(
-              (a: BasePortfolioAsset, b: BasePortfolioAsset) =>
-                b.value - a.value
-            )
-          : newSort.sort(
-              (a: BasePortfolioAsset, b: BasePortfolioAsset) =>
-                a.value - b.value
-            );
-        break;
-      case "Ticker":
-        sortedBy === "asc"
-          ? newSort.sort((a: BasePortfolioAsset, b: BasePortfolioAsset) =>
-              a.ticker.localeCompare(b.ticker)
-            )
-          : newSort.sort((a: BasePortfolioAsset, b: BasePortfolioAsset) =>
-              b.ticker.localeCompare(a.ticker)
-            );
-        break;
-      case "Shares":
-        sortedBy === "asc"
-          ? newSort.sort(
-              (a: BasePortfolioAsset, b: BasePortfolioAsset) =>
-                b.shares - a.shares
-            )
-          : newSort.sort(
-              (a: BasePortfolioAsset, b: BasePortfolioAsset) =>
-                a.shares - b.shares
-            );
-        break;
-      // case "ROI":
-      //   sortedBy === "asc"
-      //     ? newSort.sort((a:BasePortfolioAsset, b:BasePortfolioAsset) => b.roi - a.roi)
-      //     : newSort.sort((a:BasePortfolioAsset, b:BasePortfolioAsset) => a.roi - b.roi);
-      //   break;
-
-      default:
-        return;
-    }
-    setSortedBy(sortedBy === "asc" ? "desc" : "asc");
-    setBasePortfolioAssets(newSort);
-  };
 
   const findNormalizedData = (ticker: string) => {
     return normalizedAssets[ticker];
@@ -282,7 +237,7 @@ export default function Graph({ historicalAssets, flatpickr, loading }: Props) {
           <h3>
             Total Net Worth | $
             {toLocaleFixed(
-              basePortfolioAssets.reduce(
+              assets.reduce(
                 (a: number, b: BasePortfolioAsset) => a + (b.value || 0),
                 0
               )
@@ -291,91 +246,7 @@ export default function Graph({ historicalAssets, flatpickr, loading }: Props) {
         </>
 
         <h3>Portfolio</h3>
-        <div className="table-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th>
-                  <label className="check-container">
-                    Asset
-                    <input
-                      name={"combine-all"}
-                      type="checkbox"
-                      checked={
-                        basePortfolioAssets.findIndex(
-                          (x: BasePortfolioAsset) => x.show === false
-                        ) === -1
-                      }
-                      onChange={(e) => {
-                        let newShow: BasePortfolioAsset[] = [];
-                        basePortfolioAssets.forEach(
-                          (fund: BasePortfolioAsset, i: number) => {
-                            newShow[i] = {
-                              ...fund,
-                              show: e.target.checked,
-                            };
-                          }
-                        );
-                        setBasePortfolioAssets(newShow);
-                      }}
-                    />
-                    <span
-                      className="checkmark"
-                      style={{ backgroundColor: "#000" }}
-                    ></span>
-                  </label>
-                </th>
-                <th onClick={() => sortBy("Shares")}>Shares</th>
-                <th onClick={() => sortBy("Value")}>Value</th>
-                {/* <th onClick={() => sortBy("ROI")}>ROI</th> */}
-              </tr>
-            </thead>
-            <tbody>
-              {basePortfolioAssets.map(
-                (fund: BasePortfolioAsset, i: number) => {
-                  return (
-                    <tr key={i}>
-                      <td>
-                        <label className="check-container">
-                          {fund.nickname ? fund.nickname : fund.ticker}
-                          <input
-                            name={fund.nickname ? fund.nickname : fund.ticker}
-                            type="checkbox"
-                            checked={fund.show}
-                            onChange={() => {
-                              let newShow: BasePortfolioAsset[] = [];
-                              basePortfolioAssets.forEach(
-                                (x: BasePortfolioAsset, j: number) => {
-                                  newShow[j] =
-                                    i === j
-                                      ? {
-                                          ...x,
-                                          show: !fund.show,
-                                        }
-                                      : x;
-                                }
-                              );
-                              setBasePortfolioAssets(newShow);
-                            }}
-                          />
-                          <span
-                            className="checkmark"
-                            style={{
-                              backgroundColor: fund.color,
-                            }}
-                          ></span>
-                        </label>
-                      </td>
-                      <td>{currency(fund.shares).value}</td>
-                      <td> ${toLocaleFixed(fund.value)}</td>
-                      {/* <td> {toLocaleFixed(fund.roi)}%</td> */}
-                    </tr>
-                  );
-                }
-              )}
-            </tbody>
-          </table>
-        </div>
+        <Table assets={assets} setAssets={setAssets} />
       </div>
       <div className="item">
         <h3>{combineAll ? "Net Worth" : "Compare Assets"} Graph</h3>
@@ -519,26 +390,24 @@ export default function Graph({ historicalAssets, flatpickr, loading }: Props) {
                     }}
                   />
                 ) : (
-                  basePortfolioAssets.map(
-                    (fund: BasePortfolioAsset, i: number) => {
-                      if (fund && fund.show)
-                        return (
-                          <AnimatedAreaSeries
-                            key={i}
-                            // curve={curveCardinal}
-                            fill="url('#gradient')"
-                            dataKey={fund.ticker}
-                            data={findNormalizedData(fund.ticker) || []}
-                            xAccessor={(d) => d && new Date(d.date)}
-                            yAccessor={(d) => d.close}
-                            fillOpacity={0.4}
-                            lineProps={{
-                              stroke: fund.color,
-                            }}
-                          />
-                        );
-                    }
-                  )
+                  assets.map((fund: BasePortfolioAsset, i: number) => {
+                    if (fund && fund.show)
+                      return (
+                        <AnimatedAreaSeries
+                          key={i}
+                          // curve={curveCardinal}
+                          fill="url('#gradient')"
+                          dataKey={fund.ticker}
+                          data={findNormalizedData(fund.ticker) || []}
+                          xAccessor={(d) => d && new Date(d.date)}
+                          yAccessor={(d) => d.close}
+                          fillOpacity={0.4}
+                          lineProps={{
+                            stroke: fund.color,
+                          }}
+                        />
+                      );
+                  })
                 )}
 
                 <Tooltip
@@ -575,42 +444,40 @@ export default function Graph({ historicalAssets, flatpickr, loading }: Props) {
                             )}
                           </div>
                         )}
-                        {basePortfolioAssets.map(
-                          (fund: BasePortfolioAsset, i: number) => {
-                            if (
-                              tooltipData?.nearestDatum?.key !== fund.ticker ||
-                              !fund.show
-                            )
-                              return;
+                        {assets.map((fund: BasePortfolioAsset, i: number) => {
+                          if (
+                            tooltipData?.nearestDatum?.key !== fund.ticker ||
+                            !fund.show
+                          )
+                            return;
 
-                            const value = accessors.yAccessor(
-                              tooltipData?.datumByKey[fund.ticker]
-                                .datum as AssetInfo
-                            );
-                            return (
-                              <div key={i}>
-                                <span
-                                  style={{
-                                    color: fund.color,
-                                    textDecoration:
-                                      tooltipData?.nearestDatum?.key ===
-                                      fund.ticker
-                                        ? "underline"
-                                        : undefined,
-                                    fontWeight:
-                                      tooltipData?.nearestDatum?.key ===
-                                      fund.ticker
-                                        ? 700
-                                        : undefined,
-                                  }}
-                                >
-                                  {fund.nickname || fund.ticker}:{" "}
-                                  {toLocaleFixed(value)}% ROI
-                                </span>
-                              </div>
-                            );
-                          }
-                        )}
+                          const value = accessors.yAccessor(
+                            tooltipData?.datumByKey[fund.ticker]
+                              .datum as AssetInfo
+                          );
+                          return (
+                            <div key={i}>
+                              <span
+                                style={{
+                                  color: fund.color,
+                                  textDecoration:
+                                    tooltipData?.nearestDatum?.key ===
+                                    fund.ticker
+                                      ? "underline"
+                                      : undefined,
+                                  fontWeight:
+                                    tooltipData?.nearestDatum?.key ===
+                                    fund.ticker
+                                      ? 700
+                                      : undefined,
+                                }}
+                              >
+                                {fund.nickname || fund.ticker}:{" "}
+                                {toLocaleFixed(value)}% ROI
+                              </span>
+                            </div>
+                          );
+                        })}
                       </div>
                     );
                   }}
@@ -621,11 +488,7 @@ export default function Graph({ historicalAssets, flatpickr, loading }: Props) {
         </ParentSize>
         <ParentSize style={{ paddingLeft: 0, paddingRight: 0 }}>
           {(parent) => (
-            <Pie
-              parent={parent}
-              basePortfolioAssets={basePortfolioAssets}
-              netWorth={netWorth}
-            />
+            <Pie parent={parent} assets={assets} netWorth={netWorth} />
           )}
         </ParentSize>
       </div>

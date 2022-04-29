@@ -7,6 +7,7 @@ export type BasePortfolioAsset = {
   show: boolean;
   value: number;
   color?:string;
+  roi?:number;
 };
 
 export type AssetType = {

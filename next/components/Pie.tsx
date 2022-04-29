@@ -11,7 +11,7 @@ const defaultMargin = { top: 20, right: 20, bottom: 20, left: 20 };
 
 type Props = {
   parent: any;
-  basePortfolioAssets: BasePortfolioAsset[];
+  assets: BasePortfolioAsset[];
   netWorth: AssetInfo[];
   margin?: {
     top: number;
@@ -22,7 +22,7 @@ type Props = {
 };
 export default function PieGraph({
   parent,
-  basePortfolioAssets,
+  assets,
   netWorth = [],
   margin = defaultMargin,
 }: Props) {
@@ -35,7 +35,7 @@ export default function PieGraph({
   const centerX = innerWidth / 2;
   const top = centerY + margin.top;
   const left = centerX + margin.left;
-  if (basePortfolioAssets.length < 1) return null;
+  if (assets.length < 1) return null;
   const todayNetWorth = netWorth[netWorth.length - 1]
     ? netWorth[netWorth.length - 1].close
     : 0;
@@ -46,7 +46,7 @@ export default function PieGraph({
       <Group top={top} left={left}>
         <Pie
           height={300}
-          data={basePortfolioAssets.filter((x) => x.show === true)}
+          data={assets.filter((x) => x.show === true)}
           pieValue={(d) => d.value}
           outerRadius={radius}
           innerRadius={({ data }) => {
