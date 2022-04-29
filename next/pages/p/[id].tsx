@@ -16,7 +16,6 @@ type Props = {
 };
 
 export default function AnonPortfolio({ updatedAt, portfolio, pid }: Props) {
-
   const [assets, setAssets] = useState(portfolio);
 
   if (!portfolio) {
@@ -34,7 +33,7 @@ export default function AnonPortfolio({ updatedAt, portfolio, pid }: Props) {
 
   return (
     <>
-      <h2>Custom Portfolio "{pid}"</h2>
+      <h2>Shared Portfolio "{pid}"</h2>
       <Dash assets={assets} setAssets={setAssets} />
       Updated: {timeString}
     </>
@@ -49,22 +48,13 @@ export async function getStaticPaths() {
 }
 
 export const getStaticProps: GetStaticProps = async (context) => {
-  const pid = context.params?.pid;
-  if (process.env.NODE_ENV == "development")
-    return {
-      props: {
-        updatedAt: Date.now(),
-        portfolio: defaultPortfolio,
-        pid,
-      },
-      revalidate: 24 * 60 * 60, //24 hrs
-    };
+  const id = context.params?.id;
 
   const anonPortfoliosCollection = collection(firestore, "anon-portfolios");
 
   const anonPortfoliosQuery = query(
     anonPortfoliosCollection,
-    where("pid", "==", pid),
+    where("__name__", "==", id),
     limit(10)
   );
   // get the todos
@@ -74,9 +64,9 @@ export const getStaticProps: GetStaticProps = async (context) => {
   return {
     props: {
       updatedAt: Date.now(),
-      pid,
+      pid: res ? res.pid : "",
       portfolio: res ? res.portfolio : null,
     },
-    revalidate: 10,
+    revalidate: 24 * 60 * 60, //24 hrs
   };
 };

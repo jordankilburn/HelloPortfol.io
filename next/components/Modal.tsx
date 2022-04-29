@@ -28,7 +28,7 @@ export default function Manage({
         }}
       >
         <div>
-          <h2>{headline}</h2>
+          <h2 style={{marginTop:0}}>{headline}</h2>
           <div className={customClass}>{body}</div>
         </div>
       </Modal>

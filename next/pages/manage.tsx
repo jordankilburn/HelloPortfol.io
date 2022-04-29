@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useRecoilState } from "recoil";
-import { Modal } from "react-responsive-modal";
+import Modal from "../components/Modal";
 import { toast } from "react-toastify";
 import {
   basePortfolioAssetsState,
@@ -184,13 +184,13 @@ export default function Manage() {
 
   return (
     <>
-      <div className='row'>
-        <div className='item'>
+      <div className="row">
+        <div className="item">
           <h2>Manage Assets/Liabilities</h2>
           {/* <p>Add/Remove assets from portfolio</p> */}
           {/* {basePortfolioAssets.length < 20 ? ( */}
           <div className="flex-buttons">
-            <button className='green-button' onClick={() => setOpen(true)}>
+            <button className="green-button" onClick={() => setOpen(true)}>
               Add Asset
             </button>
             <DownloadUpload
@@ -204,8 +204,13 @@ export default function Manage() {
           )} */}
           {basePortfolioAssets.length > 0 && (
             <div
-              className='table-wrapper'
-              style={{ maxHeight: "100%", overflow: "auto", marginBottom:'3rem',marginTop:'1rem' }}
+              className="table-wrapper"
+              style={{
+                maxHeight: "100%",
+                overflow: "auto",
+                marginBottom: "3rem",
+                marginTop: "1rem",
+              }}
             >
               <table style={{ width: "100%" }}>
                 <thead style={{ textAlign: "left" }}>
@@ -225,7 +230,7 @@ export default function Manage() {
                         <tr key={i}>
                           <td>
                             <button
-                              className='x-button'
+                              className="x-button"
                               onClick={() => {
                                 setOpenRemove(asset);
                               }}
@@ -236,7 +241,12 @@ export default function Manage() {
                           {/* <td>{asset.account}</td> */}
                           <td>{asset.nickname || asset.ticker}</td>
                           <td>{asset.type}</td>
-                          <td>{toLocaleFixed(asset.shares,asset.shares>=1?0:2)}</td>
+                          <td>
+                            {toLocaleFixed(
+                              asset.shares,
+                              asset.shares >= 1 ? 0 : 2
+                            )}
+                          </td>
                           <td className={asset.value < 0 ? "red" : "green"}>
                             ${toLocaleFixed(asset.value)}
                           </td>
@@ -248,12 +258,12 @@ export default function Manage() {
                     <td></td>
                     <td>
                       {" "}
-                      <b className='green'>Total:</b>
+                      <b className="green">Total:</b>
                     </td>
                     <td></td>
                     <td></td>
                     <td>
-                      <b className='green'>
+                      <b className="green">
                         $
                         {toLocaleFixed(
                           basePortfolioAssets.reduce(
@@ -274,19 +284,10 @@ export default function Manage() {
       </div>
       <Modal
         open={open}
-        onClose={() => setOpen(false)}
-        center
-        closeOnEsc={false}
-        closeOnOverlayClick={false}
-        classNames={{
-          // overlay: 'customOverlay',
-          modal: "customModal",
-        }}
-      >
-        <div>
-          <h2>Add Asset</h2>
-          <div className='add-asset-form'>
-            {/* <div>
+        body={
+          <div>
+            <div className="add-asset-form">
+              {/* <div>
               Account Name
               <input
                 name="account"
@@ -295,118 +296,118 @@ export default function Manage() {
                 placeholder="Robinhood"
               />
             </div> */}
-            <div>
-              Asset Type
-              <select name='type' onChange={handleChange} value={inputs.type}>
-                <option value={""}></option>
-                {assetTypes.map((a) => (
-                  <option key={a.type} value={a.type}>
-                    {a.type}
-                  </option>
-                ))}
-              </select>
+              <div>
+                Asset Type
+                <select name="type" onChange={handleChange} value={inputs.type}>
+                  <option value={""}></option>
+                  {assetTypes.map((a) => (
+                    <option key={a.type} value={a.type}>
+                      {a.type}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {assetTypes.map((a) => {
+                if (a.type !== inputs.type) return null;
+                if (!a.ticker) return null;
+
+                return (
+                  <div key={a.ticker}>
+                    {a.ticker}
+                    <span style={{ display: "flex" }}>
+                      <input
+                        name="ticker"
+                        value={inputs.ticker || ""}
+                        onChange={handleChange}
+                        placeholder={a.tickerPlaceholder}
+                        autoComplete="off"
+                      />
+                      {/* <button className="search">🔍</button> */}
+                    </span>
+                  </div>
+                );
+              })}
+              {assetTypes.map((a) => {
+                if (a.type !== inputs.type) return null;
+                if (a.nickname)
+                  return (
+                    <div key={a.ticker}>
+                      Nickname
+                      <input
+                        name="nickname"
+                        value={inputs.nickname || ""}
+                        onChange={handleChange}
+                      />
+                    </div>
+                  );
+                if (!a.shares)
+                  return (
+                    <div key={a.ticker}>
+                      Value
+                      <input
+                        name="value"
+                        value={inputs.value || 1}
+                        onChange={handleChange}
+                        type="number"
+                      />
+                    </div>
+                  );
+
+                return (
+                  <div key={a.ticker}>
+                    {a.shares}
+                    <input
+                      name="shares"
+                      value={inputs.shares || 1}
+                      onChange={handleChange}
+                      type="number"
+                    />
+                  </div>
+                );
+              })}
             </div>
-            {assetTypes.map((a) => {
-              if (a.type !== inputs.type) return null;
-              if (!a.ticker) return null;
-
-              return (
-                <div key={a.ticker}>
-                  {a.ticker}
-                  <span style={{ display: "flex" }}>
-                    <input
-                      name='ticker'
-                      value={inputs.ticker || ""}
-                      onChange={handleChange}
-                      placeholder={a.tickerPlaceholder}
-                      autoComplete='off'
-                    />
-                    {/* <button className="search">🔍</button> */}
-                  </span>
-                </div>
-              );
-            })}
-            {assetTypes.map((a) => {
-              if (a.type !== inputs.type) return null;
-              if (a.nickname)
-                return (
-                  <div key={a.ticker}>
-                    Nickname
-                    <input
-                      name='nickname'
-                      value={inputs.nickname || ""}
-                      onChange={handleChange}
-                    />
-                  </div>
-                );
-              if (!a.shares)
-                return (
-                  <div key={a.ticker}>
-                    Value
-                    <input
-                      name='value'
-                      value={inputs.value || 1}
-                      onChange={handleChange}
-                      type='number'
-                    />
-                  </div>
-                );
-
-              return (
-                <div key={a.ticker}>
-                  {a.shares}
-                  <input
-                    name='shares'
-                    value={inputs.shares || 1}
-                    onChange={handleChange}
-                    type='number'
-                  />
-                </div>
-              );
-            })}
+            <button
+              style={{ marginTop: 20, width: "100%" }}
+              className="green-button"
+              onClick={handleAddAsset}
+            >
+              Add to Portfolio
+            </button>
           </div>
-          <button
-            style={{ marginTop: 20, width: "100%" }}
-            className='green-button'
-            onClick={handleAddAsset}
-          >
-            Add to Portfolio
-          </button>
-        </div>
-      </Modal>
+        }
+        headline={"Add Asset"}
+        setOpen={setOpen}
+        customClass={""}
+      />
       {openRemove !== null && (
         <Modal
           open={openRemove ? true : false}
-          onClose={() => setOpenRemove(null)}
-          center
-          // closeOnEsc={false}
-          // closeOnOverlayClick={false}
-          classNames={{
-            // overlay: 'customOverlay',
-            modal: "customModal",
-          }}
-        >
-          <div>
-            <h2>Remove {openRemove.nickname || openRemove.ticker}?</h2>
-            <div className='add-asset-form'>
-              <button
-                style={{ marginTop: 20, width: "100%" }}
-                className='red-button'
-                onClick={() => {
-                  setBasePortfolioAssets(
-                    basePortfolioAssets.filter(
-                      (x: BasePortfolioAsset) => x.ticker !== openRemove.ticker
-                    )
-                  );
-                  setOpenRemove(null);
-                }}
-              >
-                Yes, remove {openRemove.nickname || openRemove.ticker} from my
-                portfolio!
-              </button>
+          body={
+            <div>
+              <div className="add-asset-form">
+                <button
+                  style={{ marginTop: 20, width: "100%" }}
+                  className="red-button"
+                  onClick={() => {
+                    setBasePortfolioAssets(
+                      basePortfolioAssets.filter(
+                        (x: BasePortfolioAsset) =>
+                          x.ticker !== openRemove.ticker
+                      )
+                    );
+                    setOpenRemove(null);
+                  }}
+                >
+                  Yes, remove {openRemove.nickname || openRemove.ticker} from my
+                  portfolio!
+                </button>
+              </div>
             </div>
-          </div>
-        </Modal>
+          }
+          headline={`Remove ${openRemove.nickname || openRemove.ticker}?`}
+          setOpen={setOpenRemove}
+          customClass={""}
+        />
       )}
     </>
   );
