@@ -2,6 +2,7 @@ import { useState } from "react";
 import Modal from "../components/Modal";
 import { BasePortfolioAsset } from "../types";
 import { addDoc, collection } from "firebase/firestore";
+import { getAuth, signInAnonymously } from "firebase/auth";
 import { firestore } from "../firebase/clientApp";
 import { toast } from "react-toastify";
 
@@ -27,24 +28,43 @@ export default function Share({
     // get the current timestamp
     const timestamp: Date = new Date();
 
-    // create a pointer to our Document
-    const dbInstance = collection(firestore, "anon-portfolios");
-    // structure the todo data
+    // const auth = getAuth();
+    // signInAnonymously(auth)
+    //   .then(() => {
 
-    try {
-      addDoc(dbInstance, {
-        pid: shareName,
-        timestamp,
-        portfolio: basePortfolioAssets,
-      }).then((res) => {
+    const dbInstance = collection(firestore, "anon-portfolios");
+
+    console.log({
+      pid: shareName,
+      timestamp,
+      portfolio: basePortfolioAssets,
+    });
+    
+    addDoc(dbInstance, {
+      pid: shareName,
+      timestamp,
+      portfolio: basePortfolioAssets,
+    })
+      .then((res) => {
         setLoading(false);
         setSharedLink(`helloportfol.io/p/${res.id}`);
+      })
+      .catch((err) => {
+        console.log(err);
+        setLoading(false);
+        //show an error message
+        toast.error("An error occurred :(");
       });
-    } catch (error) {
-      setLoading(false);
-      //show an error message
-      toast.error("An error occurred :(");
-    }
+    // })
+    // .catch((error) => {
+    //   const errorCode = error.code;
+    //   const errorMessage = error.message;
+    //   console.log(error);
+    //   setLoading(false);
+    //   //show an error message
+    //   toast.error(errorMessage);
+    //   // ...
+    // });
   };
 
   return (
