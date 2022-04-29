@@ -382,7 +382,7 @@ export default function Graph({
                     dataKey={"Net Worth"}
                     // curve={curveCardinal}
                     data={netWorth || []}
-                    xAccessor={(d: AssetInfo) => new Date(d.date)}
+                    xAccessor={(d: AssetInfo) => new Date(d?.date)}
                     yAccessor={(d: AssetInfo) => d.close}
                     fillOpacity={0.4}
                     lineProps={{

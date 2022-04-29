@@ -1,30 +1,29 @@
 import React from "react";
-import Link from "next/link";
-
 import { FaBars } from "react-icons/fa";
+import { basePortfolioAssetsState } from "../utils/recoil_states";
+import { useRecoilState } from "recoil";
+import Share from "./Share";
 
 type Props = {
   handleToggleSidebar: (value: boolean) => void;
 };
 
 export default function TopBar({ handleToggleSidebar }: Props) {
+  const [basePortfolioAssets] = useRecoilState(
+    basePortfolioAssetsState
+  );
   return (
     <header>
       <div className="btn-toggle" onClick={() => handleToggleSidebar(true)}>
         <FaBars />
       </div>
       <div className="topbar">
-        {/* <span>
-          Add/Remove assets in{" "}
-          <Link href="/manage">
-            <a>Manage</a>
-          </Link>{" "}
-          then select a date range in{" "}
-          <Link href="/">
-            <a>Dashboard</a>
-          </Link>
-          .
-        </span> */}
+        <span>
+          <Share
+            basePortfolioAssets={basePortfolioAssets}
+            buttonText={"Share Portfolio"}
+          />
+        </span>
       </div>
     </header>
   );

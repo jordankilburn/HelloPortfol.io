@@ -6,9 +6,7 @@ import currency from "currency.js";
 import { exampleData } from "../utils/examplePortfolios";
 import { AssetType, BasePortfolioAsset } from "../types";
 import { SetterOrUpdater } from "recoil";
-import { addDoc, collection } from "firebase/firestore";
-import { firestore } from "../firebase/clientApp";
-import { toast } from "react-toastify";
+import Share from "./Share";
 
 const options = {
   fieldSeparator: ",",
@@ -40,11 +38,6 @@ export default function CsvReader({
 }: Props) {
   const [open, setOpen] = useState(false);
   const [openErase, setOpenErase] = useState(false);
-  const [openShare, setOpenShare] = useState(false);
-  const [shareName, setShareName] = useState("");
-  const [sharedLink,setSharedLink] = useState("")
-  const [loading, setLoading] = useState(false);
-
   const csvExporter = new ExportToCsv(options);
 
   // [{name: "", age: 0, rank: ""},{name: "", age: 0, rank: ""}]
@@ -114,42 +107,11 @@ export default function CsvReader({
     );
   };
 
-  const sharePortfolio = async () => {
-    setLoading(true);
-    if (shareName.length < 1) {
-      setLoading(false);
-      return toast.error("Type a name for your portfolio");
-    }
-    // get the current timestamp
-    const timestamp: Date = new Date();
-
-    // create a pointer to our Document
-    const dbInstance = collection(firestore, "anon-portfolios");
-    // structure the todo data
-
-    try {
-      addDoc(dbInstance, {
-        pid: shareName,
-        timestamp,
-        portfolio: basePortfolioAssets,
-      }).then((res) => {
-        setLoading(false);
-        setSharedLink(`helloportfol.io/p/${res.id}`)
-      });
-    } catch (error) {
-      setLoading(false);
-      //show an error message
-      toast.error("An error occurred :(");
-    }
-  };
-
   return (
     <>
       <button onClick={() => setOpen(true)}>Upload</button>
       <button onClick={downloadCSV}>Download</button>
-      <button className="share-button" onClick={() => setOpenShare(true)}>
-        Share
-      </button>
+      <Share basePortfolioAssets={basePortfolioAssets}/>
 
       <button className="red-button" onClick={() => setOpenErase(true)}>
         Erase Portfolio
@@ -234,39 +196,6 @@ export default function CsvReader({
           }
           open={openErase}
           setOpen={setOpenErase}
-        />
-      )}
-      {openShare && (
-        <Modal
-          customClass={""}
-          headline={"Share This Portfolio"}
-          body={
-            <div style={{ maxWidth: 350, margin: "auto" }}>
-              <p>
-                Give your portfolio a name and click share! ANYONE with this
-                link will be able to view (but not edit) this portfolio.
-              </p>
-              <input
-                name="shareName"
-                value={shareName}
-                onChange={(e) => setShareName(e.target.value)}
-                placeholder="e.g. Sick Gains Portfolio"
-              />
-              {sharedLink.length?<div style={{marginTop:20}}>Share this link: <b>{sharedLink}</b></div>:""}
-              <button
-                disabled={loading}
-                style={{ marginTop: 20, width: "100%" }}
-                className="share-button"
-                onClick={() => {
-                  sharePortfolio();
-                }}
-              >
-                Share
-              </button>
-            </div>
-          }
-          open={openShare}
-          setOpen={setOpenShare}
         />
       )}
     </>
