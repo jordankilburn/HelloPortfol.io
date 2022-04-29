@@ -15,8 +15,10 @@ type Props = {
   pid: string;
 };
 
-export default function anonPortfolio({ updatedAt, portfolio, pid }: Props) {
+export default function AnonPortfolio({ updatedAt, portfolio, pid }: Props) {
+
   const [assets, setAssets] = useState(portfolio);
+
   if (!portfolio) {
     return (
       <>
