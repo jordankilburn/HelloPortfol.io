@@ -72,7 +72,12 @@ export const getStaticProps: GetStaticProps = async (context) => {
     props: {
       updatedAt: Date.now(),
       pid: res ? res.pid : "",
-      portfolio: res ? res.portfolio : null,
+      portfolio: res
+        ? res.portfolio.map((asset: BasePortfolioAsset) => ({
+            show: true,
+            ...asset,
+          }))
+        : null,
     },
     revalidate: 24 * 60 * 60, //24 hrs
   };
