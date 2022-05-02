@@ -55,13 +55,11 @@ export const getStaticProps: GetStaticProps = async (context) => {
   const anonPortfoliosQuery = query(
     anonPortfoliosCollection,
     where("__name__", "==", id),
-    limit(10)
+    limit(1)
   );
-  // get the todos
+
   const querySnapshot = await getDocs(anonPortfoliosQuery);
 
-
-  
   const res = querySnapshot.docs[0]?.data();
 
   if (!res) {

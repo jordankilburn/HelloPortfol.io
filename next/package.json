@@ -17,6 +17,7 @@
     "@visx/responsive": "^2.8.0",
     "@visx/shape": "^2.4.0",
     "@visx/xychart": "^2.9.0",
+    "ajv": "^8.11.0",
     "axios": "^0.27.1",
     "currency.js": "^2.0.4",
     "export-to-csv": "^0.2.1",

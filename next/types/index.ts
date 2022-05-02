@@ -1,11 +1,11 @@
 export type BasePortfolioAsset = {
   ticker: string;
   shares: number;
-  nickname: string;
+  nickname?: string;
   type: string;
-  account: string;
-  show: boolean;
-  value: number;
+  account?: string;
+  show?: boolean;
+  value?: number;
   color?:string;
   roi?:number;
 };

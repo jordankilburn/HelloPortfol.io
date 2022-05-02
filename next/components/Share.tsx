@@ -1,10 +1,8 @@
 import { useState } from "react";
 import Modal from "../components/Modal";
 import { BasePortfolioAsset } from "../types";
-import { addDoc, collection } from "firebase/firestore";
-import { getAuth, signInAnonymously } from "firebase/auth";
-import { firestore } from "../firebase/clientApp";
 import { toast } from "react-toastify";
+import slugify from "../utils/slugify";
 
 type Props = {
   basePortfolioAssets: BasePortfolioAsset[];
@@ -25,46 +23,31 @@ export default function Share({
       setLoading(false);
       return toast.error("Type a name for your portfolio");
     }
-    // get the current timestamp
-    const timestamp: Date = new Date();
 
-    // const auth = getAuth();
-    // signInAnonymously(auth)
-    //   .then(() => {
-
-    const dbInstance = collection(firestore, "anon-portfolios");
-
-    console.log({
-      pid: shareName,
-      timestamp,
-      portfolio: basePortfolioAssets,
-    });
-    
-    addDoc(dbInstance, {
-      pid: shareName,
-      timestamp,
-      portfolio: basePortfolioAssets,
+    fetch("/api/share", {
+      method: "POST",
+      headers: {
+        Accept: "application/json, text/plain, */*",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        pid: shareName,
+        portfolio: basePortfolioAssets,
+      }),
     })
+      .then((res) => res.json())
       .then((res) => {
+        setLoading(false);
+        if (res.error) return toast.error(res.error);
+
         setLoading(false);
         setSharedLink(`helloportfol.io/p/${res.id}`);
       })
       .catch((err) => {
         console.log(err);
         setLoading(false);
-        //show an error message
         toast.error("An error occurred :(");
       });
-    // })
-    // .catch((error) => {
-    //   const errorCode = error.code;
-    //   const errorMessage = error.message;
-    //   console.log(error);
-    //   setLoading(false);
-    //   //show an error message
-    //   toast.error(errorMessage);
-    //   // ...
-    // });
   };
 
   return (
