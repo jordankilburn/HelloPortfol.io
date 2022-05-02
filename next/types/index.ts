@@ -5,7 +5,7 @@ export type BasePortfolioAsset = {
   type: string;
   account?: string;
   show?: boolean;
-  value?: number;
+  value: number;
   color?:string;
   roi?:number;
 };

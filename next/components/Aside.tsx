@@ -17,7 +17,7 @@ import {
   FaGithub,
   FaRegLaughWink,
   FaHeart,
-  FaFire
+  FaFire,
 } from "react-icons/fa";
 
 type Props = {
@@ -29,7 +29,7 @@ const Aside = ({ toggled, handleToggleSidebar }: Props) => {
   return (
     <ProSidebar
       toggled={toggled}
-      breakPoint='md'
+      breakPoint="md"
       onToggle={handleToggleSidebar}
     >
       <SidebarHeader
@@ -55,21 +55,15 @@ const Aside = ({ toggled, handleToggleSidebar }: Props) => {
         </div>
       </SidebarHeader>
       <SidebarContent>
-        <Menu iconShape='round' onClick={() => handleToggleSidebar(false)}>
-          <Link href='/'>
-            
-              <MenuItem icon={<FaTachometerAlt />}>Dashboard</MenuItem>
-            
+        <Menu iconShape="round" onClick={() => handleToggleSidebar(false)}>
+          <Link href="/" passHref>
+            <MenuItem icon={<FaTachometerAlt />}>Dashboard</MenuItem>
           </Link>
-          <Link href='/manage'>
-           
-              <MenuItem icon={<FaList />}>Manage</MenuItem>
-           
+          <Link href="/manage" passHref>
+            <MenuItem icon={<FaList />}>Manage</MenuItem>
           </Link>
-          <Link href='/retirement-calculator'>
-           
-              <MenuItem icon={<FaFire />}>F.I.R.E.</MenuItem>
-           
+          <Link href="/retirement-calculator" passHref>
+            <MenuItem icon={<FaFire />}>F.I.R.E.</MenuItem>
           </Link>
           {/* <MenuItem icon={<FaTachometerAlt />}>
             Retirement Calculator (soon..)
@@ -111,7 +105,7 @@ const Aside = ({ toggled, handleToggleSidebar }: Props) => {
 
       <SidebarFooter style={{ textAlign: "center" }}>
         <div
-          className='sidebar-btn-wrapper'
+          className="sidebar-btn-wrapper"
           style={{
             padding: "20px 24px",
           }}

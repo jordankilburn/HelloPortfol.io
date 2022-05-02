@@ -113,10 +113,10 @@ export default async function handler(
         shares,
         type,
         ...(account && { account }),
-        ...(value && { value }),
+        value: value ? value : 0,
       })
     );
-    temp.timestamp = '' + new Date();
+    temp.timestamp = "" + new Date();
 
     if (!isValid(temp))
       return res.status(405).json({ error: "Invalid format." });
