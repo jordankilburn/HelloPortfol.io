@@ -23,7 +23,6 @@ function Layout({ children }: Props) {
 
   return (
     <div className={`app ${toggled ? "toggled" : ""}`}>
-      <Meta />
       <ToastContainer limit={2} position="top-center" />
       <Aside toggled={toggled} handleToggleSidebar={handleToggleSidebar} />
       <main>

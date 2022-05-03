@@ -11,6 +11,7 @@ import supportedCryptos from "../utils/supportedCryptos";
 import DownloadUpload from "../components/DownloadUpload";
 import currency from "currency.js";
 import { AssetType, BasePortfolioAsset } from "../types";
+import Meta from "../components/Meta";
 
 const assetTypes: AssetType[] = [
   {
@@ -184,6 +185,7 @@ export default function Manage() {
 
   return (
     <>
+    <Meta title="HelloPortfol.io | Manange, Add, and Backtest ANY Portfolio." />
       <div className="row">
         <div className="item">
           <h2>Manage Assets/Liabilities</h2>
