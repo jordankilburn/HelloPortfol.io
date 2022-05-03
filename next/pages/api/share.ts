@@ -101,51 +101,51 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  if (req.method == "POST") {
-    const firebase = admin.firestore();
-    const { pid, portfolio } = req.body as ShareType;
-    let temp = { pid } as ShareType;
+  
+  if (req.method != "POST")
+    return res.status(405).json({ error: "Only can post here..." });
+  const firebase = admin.firestore();
+  const { pid, portfolio } = req.body as ShareType;
+  let temp = { pid } as ShareType;
 
-    temp.portfolio = portfolio.map(
-      ({ ticker, nickname, shares, type, account, value }) => ({
-        ticker,
-        ...(nickname && { nickname }),
-        shares,
-        type,
-        ...(account && { account }),
-        value: value ? value : 0,
+  temp.portfolio = portfolio.map(
+    ({ ticker, nickname, shares, type, account, value }) => ({
+      ticker,
+      ...(nickname && { nickname }),
+      shares,
+      type,
+      ...(account && { account }),
+      value: value ? value : 0,
+    })
+  );
+  temp.timestamp = "" + new Date();
+
+  if (!isValid(temp)) return res.status(405).json({ error: "Invalid format." });
+  if (temp.portfolio.length > 100)
+    return res
+      .status(405)
+      .json({ error: "Max portfolio size is 100 assets for sharing." });
+
+  return new Promise<void>(async (resolve, reject) => {
+    const id = slugify(pid);
+    const ref = await firebase.collection("anon-portfolios").doc(id).get();
+    if (ref.exists) {
+      return resolve(res.status(405).json({ error: "Name already taken" }));
+    }
+    firebase
+      .collection("anon-portfolios")
+      .doc(id)
+      .set(temp)
+      .then((doc) => {
+        res.status(200).json({ id });
+        res.end();
+        resolve();
       })
-    );
-    temp.timestamp = "" + new Date();
-
-    if (!isValid(temp))
-      return res.status(405).json({ error: "Invalid format." });
-    if (temp.portfolio.length > 100)
-      return res
-        .status(405)
-        .json({ error: "Max portfolio size is 100 assets for sharing." });
-
-    return new Promise<void>(async (resolve, reject) => {
-      const id = slugify(pid);
-      const ref = await firebase.collection("anon-portfolios").doc(id).get();
-      if (ref.exists) {
-        return resolve(res.status(405).json({ error: "Name already taken" }));
-      }
-      firebase
-        .collection("anon-portfolios")
-        .doc(id)
-        .set(temp)
-        .then((doc) => {
-          res.status(200).json({ id });
-          res.end();
-          resolve();
-        })
-        .catch((e) => {
-          console.log(e);
-          res.status(405).json(e);
-          res.end();
-          resolve();
-        });
-    });
-  }
+      .catch((e) => {
+        console.log(e);
+        res.status(405).json(e);
+        res.end();
+        resolve();
+      });
+  });
 }

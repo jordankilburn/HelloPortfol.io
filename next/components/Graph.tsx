@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import {
-  AnimatedAxis, // any of these can be non-animated equivalents
+  Axis, 
   AnimatedAreaSeries,
   XYChart,
   Tooltip,
   buildChartTheme,
-  // AreaStack,
 } from "@visx/xychart";
 import { Line } from "@visx/shape";
 import { Group } from "@visx/group";
@@ -21,7 +20,6 @@ import {
   netWorthState,
   combineAllState,
 } from "../utils/recoil_states";
-import currency from "currency.js";
 import { HistoricalAsset, AssetInfo, BasePortfolioAsset } from "../types";
 import Table from "./Table";
 
@@ -318,7 +316,7 @@ export default function Graph({
                 {combineAll && (
                   <LinearGradient from="#4F86C6" to="#4FB0C6" id="gradient" />
                 )}
-                <AnimatedAxis
+                <Axis
                   orientation="bottom"
                   numTicks={7}
                   tickFormat={(val) => new Date(val).toISOString().slice(0, 10)}
@@ -367,8 +365,8 @@ export default function Graph({
                       </g>
                     );
                   }}
-                </AnimatedAxis>
-                <AnimatedAxis
+                </Axis>
+                <Axis
                   labelOffset={2}
                   orientation="left"
                   tickFormat={(val) =>

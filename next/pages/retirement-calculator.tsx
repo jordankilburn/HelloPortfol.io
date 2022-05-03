@@ -11,7 +11,6 @@ import CustomBG from "../components/CustomChartBackground";
 import { ParentSize } from "@visx/responsive";
 import {
   AnimatedAreaSeries,
-  AnimatedAxis,
   Axis,
   buildChartTheme,
   XYChart,
@@ -84,7 +83,7 @@ export default function Dashboard() {
       //only check for 300 years
       years.push(nw);
       if (nw <= 0 && years.length > numbYears) {
-        if (oom == Infinity) oom = year - 1;
+        if (oom == Infinity) oom = year;
       }
 
       if (nw >= retireNumb) {
@@ -257,7 +256,7 @@ export default function Dashboard() {
 
                   <LinearGradient from="#4F86C6" to="#4FB0C6" id="gradient" />
 
-                  <AnimatedAxis
+                  <Axis
                     orientation="bottom"
                     numTicks={7}
                     tickFormat={(val) => `Year ${val}`}
@@ -308,7 +307,7 @@ export default function Dashboard() {
                         </g>
                       );
                     }}
-                  </AnimatedAxis>
+                  </Axis>
                   <Axis
                     labelOffset={2}
                     orientation="left"
