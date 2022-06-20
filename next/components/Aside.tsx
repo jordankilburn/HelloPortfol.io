@@ -5,20 +5,22 @@ import {
   ProSidebar,
   Menu,
   MenuItem,
-  SubMenu,
+  // SubMenu,
   SidebarHeader,
   SidebarFooter,
   SidebarContent,
 } from "react-pro-sidebar";
 import {
   FaTachometerAlt,
-  FaGem,
+  // FaGem,
   FaList,
-  FaGithub,
-  FaRegLaughWink,
-  FaHeart,
+  // FaGithub,
+  // FaRegLaughWink,
+  // FaHeart,
   FaFire,
 } from "react-icons/fa";
+
+import {GiDreadSkull} from "react-icons/gi"
 
 type Props = {
   toggled: boolean;
@@ -65,6 +67,9 @@ const Aside = ({ toggled, handleToggleSidebar }: Props) => {
           <Link href="/retirement-calculator" passHref>
             <MenuItem icon={<FaFire />}>F.I.R.E.</MenuItem>
           </Link>
+          <Link href="/buy-borrow-die" passHref>
+            <MenuItem icon={<GiDreadSkull />}>B.B.D.</MenuItem>
+          </Link>
           {/* <MenuItem icon={<FaTachometerAlt />}>
             Retirement Calculator (soon..)
             <Link to="/retirement-calculator" />
@@ -110,7 +115,7 @@ const Aside = ({ toggled, handleToggleSidebar }: Props) => {
             padding: "20px 24px",
           }}
         >
-          v0.0.1
+          v1.0.1
         </div>
       </SidebarFooter>
     </ProSidebar>

@@ -58,3 +58,14 @@ export const retirementCalcInputState = atom({
   },
   effects_UNSTABLE: [persistAtom],
 });
+
+export const bbdCalcInputState = atom({
+  key: "bbdCalcInputState", // unique ID (with respect to other atoms/selectors)
+  default: {
+    roi: 10,
+    borrowRate: 2,
+    spending: 60000,
+    portfolio: 750000,
+  },
+  effects_UNSTABLE: [persistAtom],
+});

@@ -25,6 +25,7 @@ body {
   display: flex;
   position: relative;
   .pro-sidebar {
+    width: $sidebar-width;
     height: 100vh;
     z-index: 50;
   }
@@ -118,9 +119,9 @@ body {
       }
     }
     .content {
+     width: calc(100vw - $sidebar-width - 40px);
       overflow-y: auto;
       padding: 20px;
-      
     }
     footer {
       background-color: #fff;
@@ -138,6 +139,7 @@ body {
     @media (max-width: $breakpoint-md) {
       .content {
         padding: 5px;
+        width: calc(100vw - 10px);
       }
     }
   }
@@ -205,7 +207,8 @@ body {
   justify-content: flex-start;
 }
 
-.item {
+.item,
+.item-33 {
   width: 50%;
   -ms-flex: auto;
   flex: auto;
@@ -219,6 +222,10 @@ body {
     flex-basis: 100%;
     padding: 0px;
   }
+}
+
+.item-33 {
+  width: 32%;
 }
 
 .inputs {
@@ -246,7 +253,6 @@ body {
 
   tr:nth-child(2n + 2) {
     background-color: darken($main-bg-color, 4%);
-    
   }
   tr:last-child {
     background-color: darken($main-bg-color, 10%);
@@ -255,7 +261,7 @@ body {
     background-color: transparent;
     padding-right: 0.33rem;
   }
-  td:last-child{
+  td:last-child {
     padding-right: 0;
   }
   th {
@@ -394,14 +400,13 @@ button,
   background-color: $main-red;
   margin-left: auto;
   @media (max-width: $breakpoint-md) {
-    margin: 5px
+    margin: 5px;
   }
-
 }
 
 .share-button {
- background-color: $main-purple;
- box-shadow: 0px 0px 15px 3px rgba(149, 0, 255, 0.4);
+  background-color: $main-purple;
+  box-shadow: 0px 0px 15px 3px rgba(149, 0, 255, 0.4);
 }
 
 .x-button {
