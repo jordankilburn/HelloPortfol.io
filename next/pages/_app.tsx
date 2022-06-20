@@ -12,7 +12,7 @@ function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
 
   useEffect(() => {
-    const handleRouteChange = (url:string) => {
+    const handleRouteChange = (url: string) => {
       gtag.pageview(url);
     };
     router.events.on("routeChangeComplete", handleRouteChange);
@@ -23,11 +23,13 @@ function App({ Component, pageProps }: AppProps) {
 
   return (
     <RecoilRoot>
-       <Script
+      <Script
+        id="googletagmanager"
         strategy="afterInteractive"
         src={`https://www.googletagmanager.com/gtag/js?id=${gtag.GA_TRACKING_ID}`}
       />
       <Script
+        id="GA_TRACKING_ID"
         strategy="afterInteractive"
         dangerouslySetInnerHTML={{
           __html: `
