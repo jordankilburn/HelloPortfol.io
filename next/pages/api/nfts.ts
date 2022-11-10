@@ -83,3 +83,9 @@ const getNFTs = (data: NFTs) => {
     }
   });
 };
+
+export const config = {
+  api: {
+    responseLimit: false,
+  },
+}

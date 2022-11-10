@@ -51,3 +51,9 @@ const getStocks = (data: Stocks) => {
       });
   });
 };
+
+export const config = {
+  api: {
+    responseLimit: false,
+  },
+}
