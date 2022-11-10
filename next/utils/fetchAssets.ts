@@ -1,10 +1,7 @@
 import axios from "axios";
 import { AssetInfo, BasePortfolioAsset, HistoricalAsset } from "../types";
 import supportedCryptos from "./supportedCryptos";
-const baseAPI =
-  process.env.NODE_ENV === "development"
-    ? "http://localhost:5000"
-    : "https://portfolio-tracker-express.herokuapp.com";
+const baseAPI = '/api'
 const baseCrypyoAPI = "https://api.coingecko.com/api/v3/coins";
 
 type Dates = {
@@ -42,7 +39,7 @@ export default async ({ basePortfolioAssets, startDate, endDate }: Props) => {
       return new Promise(async function (resolve, reject) {
         if (tickers.length < 1) return resolve({});
         const res = await axios
-          .post(baseAPI + "/stocks/", {
+          .post(baseAPI + "/stocks", {
             tickers,
             startDate,
             endDate,

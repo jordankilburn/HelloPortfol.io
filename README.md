@@ -8,4 +8,4 @@ A simple, yet powerful stock/crypto portfolio backtesting tool.
 3. See how that exact porfolio has performed over time & compare each component of that portfolio.
 
 ## Built With
-NextJS, Firebase, Express, & Visx
+NextJS, Firebase, & Visx
